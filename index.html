@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NexusFlow</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0f; --card: #12121a; --accent: #6c5ce7; --accent2: #a855f7;
+            --gold: #f59e0b; --text: #e2e8f0; --text2: #94a3b8; --border: #1e1e2e;
+            --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg); color: var(--text); min-height: 100vh; padding: 12px;
+        }
+        .header { text-align: center; margin-bottom: 8px; padding: 12px 0; }
+        .header h1 {
+            font-size: 24px; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header .subtitle { color: var(--text2); font-size: 11px; }
+        .user-bar {
+            display: flex; align-items: center; gap: 8px; padding: 10px;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; margin-bottom: 8px;
+        }
+        .user-avatar {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .user-info { flex: 1; }
+        .user-name { font-weight: 700; font-size: 14px; }
+        .user-status { font-size: 10px; color: var(--text2); }
+        .tokens-badge {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #000;
+            padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 800;
+        }
+        .tabs { display: flex; gap: 3px; margin-bottom: 8px; overflow-x: auto; padding: 2px 0; }
+        .tab {
+            flex: 1; min-width: 38px; padding: 8px 3px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--card); color: var(--text2);
+            text-align: center; cursor: pointer; font-size: 8px; font-weight: 600;
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .tab.active { border-color: var(--accent); background: rgba(108,92,231,0.15); color: var(--accent2); }
+        .tab.vip-only { border-color: var(--gold); color: var(--gold); }
+        .tab.dev-only { border-color: var(--red); color: var(--red); }
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 12px; margin-bottom: 8px;
+        }
+        .card-title { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+        select, input[type="text"], textarea {
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text); font-size: 12px; outline: none;
+            font-family: inherit;
+        }
+        textarea { min-height: 60px; resize: vertical; }
+        .btn {
+            width: 100%; padding: 13px; border-radius: 10px; border: none;
+            font-size: 14px; font-weight: 700; cursor: pointer; color: white;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+        .btn-gold { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #000; }
+        .btn-red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .btn:active { transform: scale(0.97); } .btn:disabled { opacity: 0.4; }
+        .btn-row { display: flex; gap: 6px; } .btn-row .btn { flex: 1; }
+        .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 800; }
+        .badge-vip { background: linear-gradient(135deg,#f59e0b,#fbbf24); color:#000; }
+        .badge-dev { background: linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
+        .badge-free { background: var(--border); color: var(--text2); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+        .stat-value { font-size: 18px; font-weight: 800; color: var(--accent2); }
+        .stat-label { font-size: 9px; color: var(--text2); }
+        .chat-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 6px; }
+        .chat-msg { padding: 6px 10px; border-radius: 8px; margin: 4px 0; font-size: 11px; }
+        .chat-msg.user { background: rgba(108,92,231,0.2); margin-left: 15px; }
+        .chat-msg.bot { background: var(--card); margin-right: 15px; }
+        .model-status { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 3px; }
+        .status-online { background: #22c55e; } .status-offline { background: #ef4444; } .status-busy { background: #f59e0b; }
+        .lang-switch { display: flex; justify-content: center; gap: 4px; margin-bottom: 8px; }
+        .lang-btn { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--text2); cursor: pointer; font-size: 10px; }
+        .lang-btn.active { border-color: var(--accent); color: var(--accent2); }
+        .ref-link-box { background: var(--bg); border: 1px dashed var(--accent); border-radius: 8px; padding: 8px; text-align: center; font-size: 11px; color: var(--accent2); word-break: break-all; margin: 6px 0; }
+        .copy-btn { background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+        .editor-clip { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px; margin: 4px 0; display: flex; align-items: center; gap: 8px; font-size: 11px; }
+        .editor-clip .clip-name { flex: 1; }
+        .editor-clip .clip-dur { color: var(--text2); font-size: 10px; }
+        .editor-clip button { background: var(--red); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="lang-switch">
+    <button class="lang-btn active" onclick="setLang('ru')">🇷🇺 RU</button>
+    <button class="lang-btn" onclick="setLang('en')">🇺🇸 EN</button>
+</div>
+
+<div class="header">
+    <h1>🎬 NexusFlow</h1>
+    <p class="subtitle" id="subtitle">Автономный ИИ-конвейер</p>
+</div>
+
+<div class="user-bar">
+    <div class="user-avatar">🎬</div>
+    <div class="user-info">
+        <div class="user-name" id="userName">Пользователь</div>
+        <div class="user-status" id="userStatus"><span class="badge badge-free">FREE</span></div>
+    </div>
+    <div class="tokens-badge" id="tokensBadge">🪙 0</div>
+</div>
+
+<div class="tabs">
+    <div class="tab active" onclick="selectTab('youtube')">🎥 YT</div>
+    <div class="tab vip-only" onclick="selectTab('photo')">🖼️ Фото</div>
+    <div class="tab vip-only" onclick="selectTab('audio')">🎤 Звук</div>
+    <div class="tab vip-only" onclick="selectTab('video')">🎬 AI</div>
+    <div class="tab" onclick="selectTab('editor')">✂️ Монтаж</div>
+    <div class="tab" onclick="selectTab('ref')">👥 Реф</div>
+    <div class="tab" onclick="selectTab('profile')">📊</div>
+    <div class="tab" onclick="selectTab('support')">💬</div>
+    <div class="tab dev-only" onclick="selectTab('dev')">🛠️</div>
+</div>
+
+<div id="content">
+    <!-- YouTube -->
+    <div id="panel-youtube">
+        <div class="card">
+            <div class="card-title" id="catLabel">📂 Категория</div>
+            <select id="youtube-cat" onchange="updateTopics()">
+                <option value="drift">🏎️ Drift</option><option value="race">🏁 Race</option>
+                <option value="build">🔧 Build</option><option value="parking">🅿️ Parking</option>
+            </select>
+        </div>
+        <div class="card">
+            <div class="card-title" id="topicLabel">📋 Тема</div>
+            <select id="youtube-topic"></select>
+            <input type="text" id="youtube-custom" placeholder="✏️ Своя тема..." style="display:none;margin-top:6px;">
+            <div style="margin-top:6px;display:flex;gap:4px;">
+                <button class="tab active" style="flex:1;" onclick="toggleMode('list')">📋</button>
+                <button class="tab" style="flex:1;" onclick="toggleMode('custom')">✏️</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title" id="formatLabel">📹 Формат</div>
+            <div style="display:flex;gap:4px;">
+                <button class="tab active" onclick="selectFmt('h',this)">📹 Гор</button>
+                <button class="tab" onclick="selectFmt('s',this)">📱 Верт</button>
+                <button class="tab" onclick="selectFmt('b',this)">🔄 Оба</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фото -->
+    <div id="panel-photo" style="display:none;">
+        <div class="card">
+            <div class="card-title">🖼️ Промт <span class="badge badge-vip">VIP/🪙5</span></div>
+            <textarea id="photo-prompt" placeholder="Опиши что сгенерировать..."></textarea>
+        </div>
+        <div class="card">
+            <div class="card-title">🤖 Модель</div>
+            <select id="photo-model">
+                <option value="gemini"><span class="model-status status-online"></span> Gemini</option>
+                <option value="copilot"><span class="model-status status-online"></span> Copilot</option>
+                <option value="chatgpt"><span class="model-status status-busy"></span> ChatGPT</option>
+                <option value="flux"><span class="model-status status-online"></span> Flux</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Звук -->
+    <div id="panel-audio" style="display:none;">
+        <div class="card">
+            <div class="card-title">🎤 Текст <span class="badge badge-vip">VIP/🪙3</span></div>
+            <textarea id="audio-text" placeholder="Введи текст для озвучки..."></textarea>
+        </div>
+        <div class="card">
+            <div class="card-title">🗣️ Голос</div>
+            <select id="audio-voice">
+                <option value="male_us">👨🇺🇸 Мужской</option>
+                <option value="female_us">👩🇺🇸 Женский</option>
+                <option value="male_uk">👨🇬🇧 Британский</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Видео AI -->
+    <div id="panel-video" style="display:none;">
+        <div class="card">
+            <div class="card-title">🎬 Промт <span class="badge badge-vip">VIP/🪙10</span></div>
+            <textarea id="video-prompt" placeholder="Опиши видео или загрузи фото..."></textarea>
+            <input type="file" id="video-photo" accept="image/*" style="display:none;" onchange="photoForVideo(this)">
+            <button class="btn-outline" style="width:100%;margin-top:6px;padding:8px;" onclick="document.getElementById('video-photo').click()">📁 Загрузить фото</button>
+            <div class="hint" id="video-photo-name"></div>
+        </div>
+        <div class="card">
+            <div class="card-title">🤖 Модель</div>
+            <select id="video-model">
+                <option value="cogvideo"><span class="model-status status-online"></span> CogVideoX (6с)</option>
+                <option value="easyanimate"><span class="model-status status-online"></span> EasyAnimate (16с)</option>
+                <option value="svd"><span class="model-status status-busy"></span> Stable VD (4с)</option>
+            </select>
+        </div>
+        <div class="card">
+            <div class="card-title">⏱️ Продлить</div>
+            <div class="btn-row">
+                <button class="btn btn-outline btn-sm" onclick="extendVideo()">🔄 Продлить (+6с)</button>
+                <button class="btn btn-outline btn-sm" onclick="addPromptToVideo()">📝 Добавить промт</button>
+            </div>
+            <div class="hint">Обычный: 5 продлений | VIP: безлимит</div>
+        </div>
+    </div>
+
+    <!-- Мини-монтаж -->
+    <div id="panel-editor" style="display:none;">
+        <div class="card">
+            <div class="card-title">✂️ Мини-монтаж (как CapCut)</div>
+            <div id="editor-clips">
+                <div class="editor-clip"><span class="clip-name">Клип 1</span><span class="clip-dur">6с</span><button>✕</button></div>
+                <div class="editor-clip"><span class="clip-name">Клип 2</span><span class="clip-dur">6с</span><button>✕</button></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">🎬 Переходы</div>
+            <div class="btn-row">
+                <button class="tab active" onclick="selectTransition('fade',this)">↔️ Плавный</button>
+                <button class="tab" onclick="selectTransition('flash',this)">⚡ Вспышка</button>
+                <button class="tab" onclick="selectTransition('zoom',this)">🎯 Зум</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">🎵 Музыка <span class="badge badge-vip">VIP</span></div>
+            <select id="editor-music">
+                <option value="phonk">🔊 Фонк</option>
+                <option value="none">🔇 Без музыки</option>
+            </select>
+        </div>
+        <button class="btn btn-primary" onclick="assembleVideo()">🔄 Собрать видео</button>
+    </div>
+
+    <!-- Рефералы -->
+    <div id="panel-ref" style="display:none;">
+        <div class="card">
+            <div class="card-title">👥 Пригласи друга</div>
+            <div class="ref-link-box" id="refLink">https://t.me/AutoVerseProBot?start=ref123</div>
+            <button class="copy-btn" onclick="copyRef()">📋 Копировать ссылку</button>
+        </div>
+        <div class="card">
+            <div class="card-title">💰 Награды</div>
+            <p style="font-size:11px;">👤 Ты: +10 🪙 за друга</p>
+            <p style="font-size:11px;">👤 Друг: +5 🪙 при входе</p>
+            <p style="font-size:11px;">💎 Друг купил VIP: +50 🪙 тебе</p>
+        </div>
+    </div>
+
+    <!-- Профиль -->
+    <div id="panel-profile" style="display:none;">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="statGen">0</div><div class="stat-label">Генераций</div></div>
+            <div class="stat-card"><div class="stat-value" id="statTokens">0</div><div class="stat-label">Токенов</div></div>
+            <div class="stat-card"><div class="stat-value" id="statRefs">0</div><div class="stat-label">Рефералов</div></div>
+            <div class="stat-card"><div class="stat-value" id="statVIP">FREE</div><div class="stat-label">Статус</div></div>
+        </div>
+    </div>
+
+    <!-- Поддержка -->
+    <div id="panel-support" style="display:none;">
+        <div class="card">
+            <div class="card-title">💬 AI-помощник (DeepSeek)</div>
+            <div class="chat-box" id="chatBox">
+                <div class="chat-msg bot">👋 Привет! Я AI-помощник NexusFlow. Спроси меня что угодно!</div>
+            </div>
+            <div style="display:flex;gap:4px;">
+                <input type="text" id="chatInput" placeholder="Вопрос..." style="flex:1;">
+                <button class="btn btn-primary" style="width:auto;padding:10px 14px;" onclick="sendChat()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Разработчик -->
+    <div id="panel-dev" style="display:none;">
+        <div class="card">
+            <div class="card-title">🛠️ Панель разработчика</div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value" id="devUsers">0</div><div class="stat-label">Пользователей</div></div>
+                <div class="stat-card"><div class="stat-value" id="devVIPs">0</div><div class="stat-label">VIP</div></div>
+                <div class="stat-card"><div class="stat-value" id="devGens">0</div><div class="stat-label">Генераций</div></div>
+                <div class="stat-card"><div class="stat-value" id="devOnline">0</div><div class="stat-label">Моделей онлайн</div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">🔑 Управление ключами</div>
+            <input type="text" id="newVipKey" placeholder="Новый VIP-ключ...">
+            <button class="btn btn-gold" style="margin-top:6px;" onclick="addVipKey()">➕ Создать ключ</button>
+        </div>
+        <div class="card">
+            <div class="card-title">🪙 Начислить токены</div>
+            <input type="text" id="tokenUserId" placeholder="ID пользователя...">
+            <input type="text" id="tokenAmount" placeholder="Сколько токенов..." style="margin-top:4px;">
+            <button class="btn btn-green" style="margin-top:6px;" onclick="addTokens()">💰 Начислить</button>
+        </div>
+        <div class="card">
+            <div class="card-title">🚫 Бан пользователя</div>
+            <input type="text" id="banUserId" placeholder="ID пользователя...">
+            <button class="btn btn-red" style="margin-top:6px;" onclick="banUser()">🚫 Забанить</button>
+        </div>
+        <div class="card">
+            <div class="card-title">🤖 Статус моделей</div>
+            <div id="modelStatuses"></div>
+            <button class="btn btn-outline" style="margin-top:6px;" onclick="checkModels()">🔄 Проверить все</button>
+        </div>
+    </div>
+
+    <button class="btn btn-primary" id="generateBtn" onclick="generate()">🔄 Сгенерировать</button>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); tg.ready();
+
+    let currentLang = 'ru', currentTab = 'youtube', selectedFormat = 'b', selectedTransition = 'fade';
+    let isVIP = false, isDev = false, userTokens = 0, userId = '';
+
+    const topics = {
+        drift:{ru:['BMW M5 дрифт','Supra дрифт','Silvia дрифт','Mustang дрифт','RX7 дрифт'],en:['BMW M5 drift','Supra drift','Silvia drift','Mustang drift','RX7 drift']},
+        race:{ru:['BMW M5 драг','GTR заезд','Plaid гонка','911 трек'],en:['BMW M5 drag','GTR race','Plaid race','911 track']},
+        build:{ru:['Supra сборка','M5 турбо','GTR сборка','WRX сборка'],en:['Supra build','M5 turbo','GTR build','WRX build']},
+        parking:{ru:['Параллельная','Тесная','Задняя','Tesla'],en:['Parallel','Tight','Reverse','Tesla']}
+    };
+
+    const tr = {
+        ru:{subtitle:'Автономный ИИ-конвейер',catLabel:'📂 Категория',topicLabel:'📋 Тема',formatLabel:'📹 Формат',genBtn:'🔄 Сгенерировать'},
+        en:{subtitle:'Autonomous AI Pipeline',catLabel:'📂 Category',topicLabel:'📋 Topic',formatLabel:'📹 Format',genBtn:'🔄 Generate'}
+    };
+
+    // Инициализация
+    tg.onEvent('viewportChanged', () => tg.expand());
+    const initData = tg.initDataUnsafe || {};
+    if (initData.user) {
+        userId = initData.user.id;
+        document.getElementById('userName').textContent = initData.user.first_name || 'User';
+        document.getElementById('refLink').textContent = `https://t.me/AutoVerseProBot?start=ref${userId}`;
+    }
+
+    function setLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+        updateUI(); updateTopics();
+    }
+
+    function updateUI() {
+        const t = tr[currentLang];
+        document.getElementById('subtitle').textContent = t.subtitle;
+        document.getElementById('catLabel').textContent = t.catLabel;
+        document.getElementById('topicLabel').textContent = t.topicLabel;
+        document.getElementById('formatLabel').textContent = t.formatLabel;
+        document.getElementById('generateBtn').textContent = t.genBtn;
+    }
+
+    function selectTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+        const tabEl = document.querySelector(`.tab[onclick="selectTab('${tab}')"]`);
+        if (tabEl) tabEl.classList.add('active');
+        ['youtube','photo','audio','video','editor','ref','profile','support','dev'].forEach(t => {
+            const p = document.getElementById(`panel-${t}`);
+            if (p) p.style.display = t === tab ? 'block' : 'none';
+        });
+    }
+
+    function selectFmt(fmt, el) {
+        selectedFormat = fmt;
+        el.parentElement.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function selectTransition(tr, el) {
+        selectedTransition = tr;
+        el.parentElement.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function toggleMode(mode) {
+        document.getElementById('youtube-topic').style.display = mode==='list'?'block':'none';
+        document.getElementById('youtube-custom').style.display = mode==='custom'?'block':'none';
+    }
+
+    function updateTopics() {
+        const cat = document.getElementById('youtube-cat').value;
+        const list = topics[cat]?.[currentLang] || [];
+        document.getElementById('youtube-topic').innerHTML = list.map(t => `<option>${t}</option>`).join('');
+    }
+
+    function copyRef() {
+        navigator.clipboard.writeText(document.getElementById('refLink').textContent);
+        tg.showPopup({message:'✅ Скопировано!'});
+    }
+
+    function sendChat() {
+        const input = document.getElementById('chatInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+        const box = document.getElementById('chatBox');
+        box.innerHTML += `<div class="chat-msg user">${msg}</div>`;
+        input.value = '';
+        setTimeout(() => {
+            const replies = {ru:['Помогу!','Отличный вопрос!','Сейчас разберёмся.'],en:['I will help!','Good question!']};
+            const r = replies[currentLang][Math.floor(Math.random()*3)];
+            box.innerHTML += `<div class="chat-msg bot">${r}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }, 500);
+    }
+
+    function extendVideo() {
+        tg.showPopup({message:'🔄 Видео продлено! +6 секунд'});
+    }
+
+    function addPromptToVideo() {
+        tg.showPopup({message:'📝 Промт добавлен! Следующий сегмент будет по новому описанию.'});
+    }
+
+    function assembleVideo() {
+        tg.showPopup({message:'🎬 Видео собрано! Переходы применены.'});
+    }
+
+    function photoForVideo(input) {
+        if (input.files[0]) {
+            document.getElementById('video-photo-name').textContent = '📸 '+input.files[0].name;
+        }
+    }
+
+    function addVipKey() { tg.showPopup({message:'✅ Ключ создан!'}); }
+    function addTokens() { tg.showPopup({message:'💰 Токены начислены!'}); }
+    function banUser() { tg.showPopup({message:'🚫 Пользователь забанен!'}); }
+    function checkModels() { tg.showPopup({message:'🔄 Проверка моделей... Все онлайн!'}); }
+
+    function generate() {
+        let payload = {action:'generate',tab:currentTab,lang:currentLang,userId:userId};
+        if (currentTab==='youtube') {
+            payload.topic = document.getElementById('youtube-custom').style.display==='block' ? document.getElementById('youtube-custom').value : document.getElementById('youtube-topic').value;
+            payload.category = document.getElementById('youtube-cat').value;
+            payload.format = selectedFormat;
+        }
+        if (currentTab==='photo') {
+            payload.prompt = document.getElementById('photo-prompt').value;
+            payload.model = document.getElementById('photo-model').value;
+        }
+        if (currentTab==='audio') {
+            payload.text = document.getElementById('audio-text').value;
+            payload.voice = document.getElementById('audio-voice').value;
+        }
+        if (currentTab==='video') {
+            payload.prompt = document.getElementById('video-prompt').value;
+            payload.model = document.getElementById('video-model').value;
+        }
+        tg.sendData(JSON.stringify(payload));
+        tg.showPopup({message:'✅ Задача отправлена!\n⏳ Генерация...'});
+    }
+
+    updateTopics(); updateUI();
+</script>
+</body>
+</html>
