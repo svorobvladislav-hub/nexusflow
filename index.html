@@ -78,6 +78,7 @@
         .lock-screen .lock-icon { font-size:60px; margin-bottom:16px; }
         .lock-screen .lock-title { font-size:18px; font-weight:700; margin-bottom:8px; }
         .lock-screen .lock-desc { font-size:13px; color:var(--text2); margin-bottom:20px; }
+        .lock-screen .lock-error { font-size:11px; color:var(--red); margin-top:6px; min-height:16px; }
         .file-list-item { display:flex; align-items:center; gap:8px; padding:10px; border-bottom:1px solid var(--border); }
         .file-list-item .file-icon { font-size:18px; } .file-list-item .file-name { flex:1; font-size:13px; } .file-list-item .file-size { font-size:10px; color:var(--text2); }
         .modal { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:100; display:flex; align-items:center; justify-content:center; }
@@ -103,7 +104,7 @@
     <div class="header">
         <div class="logo">🎬</div>
         <h1>NexusFlow</h1>
-        <p class="subtitle">AI Video Pipeline · v3.2</p>
+        <p class="subtitle">AI Video Pipeline · v3.3</p>
     </div>
     <div class="profile-bar">
         <div class="avatar">👤</div>
@@ -186,29 +187,12 @@ tokens:[{t:50,r:300,u:3},{t:150,r:800,u:8},{t:500,r:2000,u:20},{t:1000,r:3500,u:
 };
 
 const knowledgeBase = {
-ru: {
-'привет':'👋 Привет! Я AI-помощник NexusFlow. Спроси о видео, VIP, моделях!',
-'как создать':'📹 **YouTube:**\n1. 🎥 YT\n2. Категория\n3. Тема\n4. Голос\n5. Формат\n6. "Сгенерировать"',
-'vip':'💎 **VIP:**\n1. Оплата на карту 2204321238722\n2. Напиши @Vlad_Svorob\n3. Получи ключ',
-'цена':'💰 VIP: 500₽/мес, 3500₽ навсегда\n🪙 Токены: 50=300₽',
-'default':'Я помогу с видео, VIP, токенами. Спроси! 😊'
-},
-en: {
-'hello':'👋 Hi! I am NexusFlow AI assistant.',
-'video':'📹 **YouTube:**\n1. 🎥 YT tab\n2. Category\n3. Topic\n4. Voice\n5. Format\n6. "Generate"',
-'default':'I can help with videos, VIP, tokens. Ask me! 😊'
-}
+ru: {'привет':'👋 Привет! Я AI-помощник NexusFlow.','как создать':'📹 **YouTube:**\n1. 🎥 YT\n2. Категория\n3. Тема\n4. Голос\n5. Формат\n6. "Сгенерировать"','vip':'💎 **VIP:**\n1. Оплата на карту\n2. Напиши @Vlad_Svorob\n3. Получи ключ','default':'Я помогу с видео, VIP, токенами. Спроси! 😊'},
+en: {'hello':'👋 Hi! I am NexusFlow AI assistant.','video':'📹 **YouTube:**\n1. 🎥 YT tab\n2. Category\n3. Topic\n4. Voice\n5. Format\n6. "Generate"','default':'I can help with videos, VIP, tokens. Ask me! 😊'}
 };
 
-function findBestAnswer(q){
-const kb = knowledgeBase[lang] || knowledgeBase['ru'];
-for(const [key, val] of Object.entries(kb)){
-if(q.toLowerCase().includes(key)) return val;
-}
-return kb['default'];
-}
-
-const genTabs = ['youtube', 'photo', 'audio', 'video'];
+function findBestAnswer(q){const kb=knowledgeBase[lang]||knowledgeBase['ru'];for(const[k,v]of Object.entries(kb)){if(q.toLowerCase().includes(k))return v;}return kb['default'];}
+const genTabs=['youtube','photo','audio','video'];
 
 function R(){render();}
 function render(){
@@ -223,8 +207,21 @@ if(tab==='learn')h=learnTab();
 if(tab==='support')h=supportTab();
 if(tab==='dev')h=devTab();
 c.innerHTML=h;
-document.getElementById('generateBtnContainer').style.display = genTabs.includes(tab) ? 'block' : 'none';
-document.getElementById('progress').style.display = 'none';
+document.getElementById('generateBtnContainer').style.display=genTabs.includes(tab)?'block':'none';
+document.getElementById('progress').style.display='none';
+// Вешаем обработчик на кнопку разблокировки после рендера
+setTimeout(()=>{
+const btn=document.getElementById('devUnlockBtn');
+if(btn){btn.onclick=function(){
+const keyInput=document.getElementById('devKeyInput');
+const errEl=document.getElementById('devError');
+if(!keyInput)return;
+const key=keyInput.value.trim();
+if(!key){if(errEl)errEl.textContent=lang==='ru'?'❌ Введи ключ!':'❌ Enter key!';return;}
+if(DEV_KEYS.includes(key)){devMode=true;if(errEl)errEl.textContent='';R();}
+else{if(errEl)errEl.textContent=lang==='ru'?'❌ Неверный ключ':'❌ Invalid key';keyInput.value='';}
+};}
+},100);
 }
 
 function catName(c){return c[lang]||c['en'];}
@@ -253,7 +250,7 @@ let h=`<div class="glass"><div class="section-title">🎬 Промт или фо
 <div class="glass"><div class="section-title">🤖 Модель (${models.video.length})</div><div class="model-list">${models.video.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.d||''} · ${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
 h+=`<div class="glass"><div class="section-title">⏱️ Продление видео</div>
 <div class="extend-bar">
-<span class="extend-count">📹 ${videoExtensions * 6}с / ${maxExtensions * 6}с</span>
+<span class="extend-count">📹 ${videoExtensions*6}с / ${maxExtensions*6}с</span>
 <button class="btn btn-outline btn-xs" onclick="extendVideo()" style="flex:1;">🔄 Продлить +6с</button>
 <button class="btn btn-outline btn-xs" onclick="addPromptToVideo()" style="flex:1;">📝 Добавить промт</button>
 </div>
@@ -262,17 +259,9 @@ return h;
 }
 
 function extendVideo(){
-if(videoExtensions >= maxExtensions){
-tg.showPopup({message: '⚠️ Достигнут лимит продлений. Купи VIP для безлимита!'});
-return;
-}
-videoExtensions++;
-tg.showPopup({message: `✅ Видео продлено! Всего: ${videoExtensions * 6} секунд`});
-}
-
-function addPromptToVideo(){
-tg.showPopup({message: '📝 Введи новый промт для следующего сегмента в поле выше.'});
-}
+if(videoExtensions>=maxExtensions){tg.showPopup({message:'⚠️ Лимит продлений. VIP — безлимит!'});return;}
+videoExtensions++;tg.showPopup({message:`✅ Продлено! Всего: ${videoExtensions*6}с`});}
+function addPromptToVideo(){tg.showPopup({message:'📝 Введи новый промт в поле выше.'});}
 
 function audioTab(){
 return`<div class="glass"><div class="section-title">🎤 Текст <span class="badge badge-vip">VIP/🪙3</span></div><textarea placeholder="${lang==='ru'?'Введи текст...':'Enter text...'}"></textarea></div>
@@ -300,10 +289,7 @@ return`<div class="glass"><div class="section-title">👥 Рефералы</div>
 
 function learnTab(){
 let h=`<div class="glass"><div class="section-title">📚 Обучение</div>`;
-const guides=[
-{ru:'🎥 YouTube видео',en:'🎥 YouTube Video',desc_ru:'1. Категория\n2. Тема\n3. Голос\n4. Формат\n5. "Сгенерировать"',desc_en:'1. Category\n2. Topic\n3. Voice\n4. Format\n5. "Generate"'},
-{ru:'💎 VIP',en:'💎 VIP',desc_ru:'1. Оплата на карту\n2. Напиши @Vlad_Svorob\n3. Получи ключ',desc_en:'1. Pay\n2. Message @Vlad_Svorob\n3. Get key'}
-];
+const guides=[{ru:'🎥 YouTube видео',en:'🎥 YouTube Video',desc_ru:'1. Категория\n2. Тема\n3. Голос\n4. Формат\n5. "Сгенерировать"',desc_en:'1. Category\n2. Topic\n3. Voice\n4. Format\n5. "Generate"'},{ru:'💎 VIP',en:'💎 VIP',desc_ru:'1. Оплата\n2. Напиши @Vlad_Svorob\n3. Получи ключ',desc_en:'1. Pay\n2. Message @Vlad_Svorob\n3. Get key'}];
 guides.forEach(g=>{h+=`<div class="glass"><div class="section-title">${g[lang]||g['en']}</div><p style="font-size:12px;white-space:pre-line;">${g['desc_'+lang]||g['desc_en']}</p></div>`;});
 return h;
 }
@@ -326,9 +312,10 @@ if(!devMode){
 h+=`<div class="lock-screen"><div class="lock-icon">🔒</div>
 <div class="lock-title">${lang==='ru'?'Доступ ограничен':'Access Restricted'}</div>
 <div class="lock-desc">${lang==='ru'?'Введи ключ разработчика':'Enter developer key'}</div>
-<input type="text" id="devKeyInput" placeholder="DEV-ключ..." style="text-align:center;margin-bottom:12px;">
-<button class="btn btn-gold btn-sm" style="width:100%;" id="devUnlockBtn" onclick="checkDevKey()">🔓 ${lang==='ru'?'Разблокировать':'Unlock'}</button>
-<p style="font-size:10px;color:var(--text2);margin-top:10px;">${lang==='ru'?'Нет ключа? Напиши @Vlad_Svorob':'No key? Message @Vlad_Svorob'}</p></div></div>`;
+<input type="text" id="devKeyInput" placeholder="DEV-ключ..." style="text-align:center;margin-bottom:8px;">
+<button class="btn btn-gold btn-sm" style="width:100%;" id="devUnlockBtn">🔓 ${lang==='ru'?'Разблокировать':'Unlock'}</button>
+<div class="lock-error" id="devError"></div>
+<p style="font-size:10px;color:var(--text2);margin-top:8px;">${lang==='ru'?'Нет ключа? Напиши @Vlad_Svorob':'No key? Message @Vlad_Svorob'}</p></div></div>`;
 return h;
 }
 h+=`<div class="stats-grid"><div class="stat-card"><div class="stat-value stat-accent">156</div><div class="stat-label">Пользователей</div></div><div class="stat-card"><div class="stat-value stat-gold">23</div><div class="stat-label">VIP</div></div><div class="stat-card"><div class="stat-value">142</div><div class="stat-label">Генераций</div></div><div class="stat-card"><div class="stat-value">8/8</div><div class="stat-label">Моделей</div></div></div>
@@ -336,28 +323,11 @@ h+=`<div class="stats-grid"><div class="stat-card"><div class="stat-value stat-a
 <button class="btn btn-red btn-sm" style="width:100%;margin-top:6px;" onclick="devMode=false;R();">🔒 Выйти</button></div>
 <div class="glass"><div class="section-title">📁 Файлы</div>`;
 files.forEach((f,i)=>{h+=`<div class="file-list-item"><div class="file-icon">${f.t==='html'?'📄':f.t==='python'?'🐍':'📝'}</div><div class="file-name">${f.n}</div><div class="file-size">${f.s}</div><div class="file-actions"><button class="btn btn-outline btn-sm" onclick="editFile(${i})">✏️</button></div></div>`;});
-h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v3.2 — Dev Fixed + Extend</p></div>`;
+h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v3.3 — Dev 100% Fixed</p></div>`;
 return h;
 }
 
-function checkDevKey(){
-const keyInput = document.getElementById('devKeyInput');
-if (!keyInput) { alert('Ошибка: поле ввода не найдено'); return; }
-const key = keyInput.value.trim();
-if (!key) { alert('❌ Введи ключ!'); return; }
-if (DEV_KEYS.includes(key)) {
-devMode = true;
-alert('✅ Доступ разрешён!');
-R();
-} else {
-alert('❌ Неверный ключ: ' + key);
-}
-}
-
-function editFile(i){
-const f=files[i];const m=document.getElementById('modal');m.style.display='flex';
-m.innerHTML=`<div class="modal-content"><div class="section-title">✏️ ${f.n}</div><div class="editor-toolbar"><button onclick="saveFile(${i})">💾 Сохранить</button><button onclick="closeModal()">❌ Отмена</button></div><div class="code-editor" contenteditable="true">// ${f.n}</div></div>`;
-}
+function editFile(i){const f=files[i];const m=document.getElementById('modal');m.style.display='flex';m.innerHTML=`<div class="modal-content"><div class="section-title">✏️ ${f.n}</div><div class="editor-toolbar"><button onclick="saveFile(${i})">💾 Сохранить</button><button onclick="closeModal()">❌ Отмена</button></div><div class="code-editor" contenteditable="true">// ${f.n}</div></div>`;}
 function saveFile(i){closeModal();tg.showPopup({message:'✅ Сохранено!'});}
 function closeModal(){document.getElementById('modal').style.display='none';}
 function selectTab(t){tab=t;videoExtensions=0;document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));const el=document.querySelector(`.tab[onclick*="${t}"]`);if(el)el.classList.add('active');R();}
@@ -365,10 +335,7 @@ function selectFmt(f){fmt=f;R();}
 function setLang(l){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');R();}
 function buyItem(i){tg.openTelegramLink('https://t.me/'+telegramUser);}
 function copyText(t){navigator.clipboard.writeText(t);tg.showPopup({message:'✅ Скопировано!'});}
-function updateCatHelp(){
-const cat=document.getElementById('ycat')?.value;const c=categories.find(x=>x.n===cat);
-if(c){document.getElementById('catHelp').innerHTML='💡 '+(lang==='ru'?`Музыка: ${c.music} | Озвучка: ${c.voice==='none'?'нет':c.voice}`:`Music: ${c.music} | Voice: ${c.voice==='none'?'none':c.voice}`);}
-}
+function updateCatHelp(){const cat=document.getElementById('ycat')?.value;const c=categories.find(x=>x.n===cat);if(c){document.getElementById('catHelp').innerHTML='💡 '+(lang==='ru'?`Музыка: ${c.music} | Озвучка: ${c.voice==='none'?'нет':c.voice}`:`Music: ${c.music} | Voice: ${c.voice==='none'?'none':c.voice}`);}}
 
 function generate(){
 document.getElementById('progress').style.display='block';
