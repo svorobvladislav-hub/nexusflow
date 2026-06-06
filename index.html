@@ -102,7 +102,7 @@
     <div class="header">
         <div class="logo">🎬</div>
         <h1>NexusFlow</h1>
-        <p class="subtitle">AI Video Pipeline · v2.4</p>
+        <p class="subtitle">AI Video Pipeline · v2.5</p>
     </div>
     <div class="profile-bar">
         <div class="avatar">👤</div>
@@ -174,12 +174,53 @@ video:[{n:'YouTube+CLIP',s:'green',d:'5-15мин'},{n:'CogVideoX',s:'green',d:'6
 audio:[{n:'Google TTS',s:'green'},{n:'Edge TTS',s:'green'},{n:'gTTS',s:'green'},{n:'ElevenLabs',s:'red'}]
 };
 
-const files=[{n:'index.html',s:'16 KB',t:'html'},{n:'bot.py',s:'8 KB',t:'python'},{n:'requirements.txt',s:'0.3 KB',t:'text'},{n:'Dockerfile',s:'0.4 KB',t:'docker'}];
+const files=[{n:'index.html',s:'18 KB',t:'html'},{n:'bot.py',s:'8 KB',t:'python'},{n:'requirements.txt',s:'0.3 KB',t:'text'},{n:'Dockerfile',s:'0.4 KB',t:'docker'}];
 
 const prices={
 vip:[{d:'1 месяц',r:500,u:5},{d:'2 месяца',r:900,u:9},{d:'3 месяца',r:1200,u:12},{d:'6 месяцев',r:2000,u:20},{d:'Навсегда',r:3500,u:35}],
 tokens:[{t:50,r:300,u:3},{t:150,r:800,u:8},{t:500,r:2000,u:20},{t:1000,r:3500,u:35}]
 };
+
+// Обученная база знаний для AI-помощника
+const knowledgeBase = {
+ru: {
+'привет':'👋 Привет! Я AI-помощник NexusFlow. Я знаю всё о сервисе. Спроси меня о создании видео, VIP, токенах или моделях!',
+'как создать видео':'📹 **Как создать YouTube видео:**\n1. Выбери вкладку 🎥 YT\n2. Выбери категорию (Drift, Gaming, Tech...)\n3. Напиши тему видео\n4. Выбери голос озвучки\n5. Выбери формат (Гор/Верт/Оба)\n6. Нажми "✨ Сгенерировать"\n7. Жди 5-10 минут',
+'как получить vip':'💎 **Как получить VIP:**\n1. Переведи оплату на карту: 2204 3212 3872 2 (Ozon Bank)\n2. Или СБП: +79095159079\n3. Напиши @Vlad_Svorob\n4. Получи VIP ключ\n5. Введи ключ в боте командой /start',
+'сколько стоит':'💰 **Цены VIP:**\n• 1 месяц — 500₽\n• 3 месяца — 1200₽\n• Навсегда — 3500₽\n\n🪙 **Токены:**\n• 50 токенов — 300₽\n• 150 токенов — 800₽\n• 500 токенов — 2000₽',
+'какие модели':'🤖 **Доступные модели:**\n\n🖼️ Фото (8): Gemini, Flux, SD, SDXL, Copilot, ChatGPT, Midjourney, Leonardo\n\n🎬 Видео (9): YouTube+CLIP, CogVideoX, EasyAnimate, SVD, Zeroscope, Modelscope, I2VGen-XL, Pika Labs, RunwayML\n\n🎤 Звук (4): Google TTS, Edge TTS, gTTS, ElevenLabs',
+'какие категории':'📂 **12 категорий:**\n🏎️ Drift | 🏁 Race | 🔧 Build | 🅿️ Parking\n🎮 Gaming | 📱 Tech | 🍳 Cooking | 🏀 Sports\n🌍 Travel | 🐱 Animals | 📚 Education | 🏠 DIY',
+'какие голоса':'🎤 **9 голосов озвучки:**\n👨🇺🇸 Мужской (США) | 👩🇺🇸 Женский (США)\n👨🇬🇧 Британский | 👩🇬🇧 Британская\n👨🇷🇺 Русский мужской | 👩🇷🇺 Русский женский\n👨🇩🇪 Немецкий | 👩🇪🇸 Испанский\n🤖 Авто (по языку)',
+'рефералы':'👥 **Реферальная система:**\n1. Открой вкладку 👥 Реф\n2. Скопируй свою ссылку\n3. Отправь другу\n4. Получи +10🪙 за друга\n5. Друг получит +5🪙\n6. Если друг купит VIP — +50🪙',
+'ошибка':'⚠️ **Если что-то не работает:**\n1. Проверь интернет\n2. Убедись что бот отвечает (/start)\n3. Проверь GitHub Pages\n4. Если генерация не идёт — запусти Colab\n5. Напиши @Vlad_Svorob',
+'токены':'🪙 **Токены можно тратить на:**\n• 🖼️ Фото — 5 токенов\n• 🎤 Звук — 3 токена\n• 🎬 AI Видео — 10 токенов\n\nПолучить токены:\n• Пригласить друга (+10)\n• Купить (50/150/500/1000)',
+'как продавать':'💼 **Ты хочешь продавать VIP?**\nНапиши @Vlad_Svorob — обсудим партнёрство!',
+'dev':'🛠️ **Dev-панель доступна по ключу.**\nКоманды:\n/genkey — создать VIP ключ\n/addtokens — начислить токены\n/ban — заблокировать\n/stats — статистика',
+'default':'Я могу помочь с:\n• Созданием видео\n• VIP и токенами\n• Моделями и голосами\n• Рефералами\n• Ошибками\n\nСпроси конкретнее! 😊'
+},
+en: {
+'hello':'👋 Hi! I am NexusFlow AI assistant. Ask me about video creation, VIP, tokens or models!',
+'how to create video':'📹 **How to create YouTube video:**\n1. Choose 🎥 YT tab\n2. Select category\n3. Write topic\n4. Choose voice\n5. Choose format\n6. Press "Generate"\n7. Wait 5-10 minutes',
+'how to get vip':'💎 **How to get VIP:**\n1. Send payment to card\n2. Message @Vlad_Svorob\n3. Get VIP key\n4. Enter key in bot',
+'price':'💰 **VIP Prices:**\n• 1 month — $5\n• 3 months — $12\n• Forever — $35\n\n🪙 **Tokens:**\n• 50 tokens — $3\n• 150 tokens — $8\n• 500 tokens — $20',
+'models':'🤖 **Available models:**\n🖼️ Photo (8): Gemini, Flux, SD, SDXL...\n🎬 Video (9): YouTube+CLIP, CogVideoX...\n🎤 Audio (4): Google TTS, Edge TTS...',
+'categories':'📂 **12 categories:** Drift, Race, Build, Parking, Gaming, Tech, Cooking, Sports, Travel, Animals, Education, DIY',
+'voices':'🎤 **9 voices:** Male/Female US/UK/RU/DE/ES + Auto',
+'referrals':'👥 **Referral system:**\n1. Copy your link\n2. Send to friend\n3. Get +10🪙\n4. Friend gets +5🪙\n5. VIP purchase = +50🪙',
+'error':'⚠️ **If something is wrong:**\n1. Check internet\n2. Check bot (/start)\n3. Restart Colab\n4. Message @Vlad_Svorob',
+'tokens':'🪙 **Spend tokens on:**\n• 🖼️ Photo — 5\n• 🎤 Audio — 3\n• 🎬 Video — 10\n\nEarn: invite friends (+10)',
+'default':'I can help with:\n• Video creation\n• VIP & tokens\n• Models & voices\n• Referrals\n• Errors\n\nAsk more specifically! 😊'
+}
+};
+
+function findBestAnswer(q){
+const kb = knowledgeBase[lang] || knowledgeBase['ru'];
+const qLower = q.toLowerCase();
+for(const [key, val] of Object.entries(kb)){
+if(qLower.includes(key)) return val;
+}
+return kb['default'];
+}
 
 function R(){render();}
 function render(){
@@ -202,9 +243,9 @@ function vName(v){return v[lang]||v['en'];}
 function youtubeTab(){
 let h=`<div class="glass"><div class="section-title">📂 Категория</div><select id="ycat" onchange="updateCatHelp()">`;
 categories.forEach(c=>{h+=`<option value="${c.n}">${catName(c)}</option>`;});
-h+=`</select><div class="help-box" id="catHelp">💡 ${lang==='ru'?'Выбери категорию для видео':'Choose a category for your video'}</div></div>`;
-h+=`<div class="glass"><div class="section-title">📋 Тема</div><input type="text" placeholder="${lang==='ru'?'Опиши тему видео...':'Describe your video topic...'}"></div>`;
-h+=`<div class="glass"><div class="section-title">🎤 Голос озвучки</div><select id="voice" onchange="currentVoice=this.value">`;
+h+=`</select><div class="help-box" id="catHelp">💡 ${lang==='ru'?'Выбери категорию':'Choose category'}</div></div>`;
+h+=`<div class="glass"><div class="section-title">📋 Тема</div><input type="text" placeholder="${lang==='ru'?'Опиши тему...':'Describe topic...'}"></div>`;
+h+=`<div class="glass"><div class="section-title">🎤 Голос</div><select id="voice" onchange="currentVoice=this.value">`;
 voices.forEach(v=>{h+=`<option value="${v.n}" ${v.n===currentVoice?'selected':''}>${vName(v)}</option>`;});
 h+=`</select></div>`;
 h+=`<div class="glass"><div class="section-title">📹 Формат</div><div class="btn-row"><button class="btn btn-sm ${fmt==='h'?'btn-primary':'btn-outline'}" onclick="selectFmt('h')">📹 Гор</button><button class="btn btn-sm ${fmt==='s'?'btn-primary':'btn-outline'}" onclick="selectFmt('s')">📱 Верт</button><button class="btn btn-sm ${fmt==='b'?'btn-primary':'btn-outline'}" onclick="selectFmt('b')">🔄 Оба</button></div></div>`;
@@ -213,7 +254,7 @@ return h;
 
 function photoTab(){
 return`<div class="glass"><div class="section-title">🖼️ Промт <span class="badge badge-vip">VIP/🪙5</span></div><textarea placeholder="${lang==='ru'?'Опиши что сгенерировать...':'Describe what to generate...'}"></textarea></div>
-<div class="glass"><div class="section-title">🤖 Модель (${models.photo.length})</div><div class="model-list">${models.photo.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.s==='red'?'🔜 Скоро':'✅'}</small></div>`).join('')}</div></div>`;
+<div class="glass"><div class="section-title">🤖 Модель (${models.photo.length})</div><div class="model-list">${models.photo.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
 }
 
 function videoTab(){
@@ -223,9 +264,9 @@ return`<div class="glass"><div class="section-title">🎬 Промт <span class
 }
 
 function audioTab(){
-return`<div class="glass"><div class="section-title">🎤 Текст <span class="badge badge-vip">VIP/🪙3</span></div><textarea placeholder="${lang==='ru'?'Введи текст для озвучки...':'Enter text for voiceover...'}"></textarea></div>
+return`<div class="glass"><div class="section-title">🎤 Текст <span class="badge badge-vip">VIP/🪙3</span></div><textarea placeholder="${lang==='ru'?'Введи текст...':'Enter text...'}"></textarea></div>
 <div class="glass"><div class="section-title">🗣️ Голос</div><select>${voices.map(v=>`<option value="${v.n}">${vName(v)}</option>`).join('')}</select></div>
-<div class="glass"><div class="section-title">🤖 Модель (${models.audio.length})</div><div class="model-list">${models.audio.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.s==='red'?'🔜 Скоро':'✅'}</small></div>`).join('')}</div></div>`;
+<div class="glass"><div class="section-title">🤖 Модель (${models.audio.length})</div><div class="model-list">${models.audio.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
 }
 
 function buyTab(){
@@ -250,7 +291,7 @@ function learnTab(){
 let h=`<div class="glass"><div class="section-title">📚 Обучение</div>`;
 const guides=[
 {ru:'🎥 YouTube видео',en:'🎥 YouTube Video',desc_ru:'1. Выбери категорию и тему\n2. Выбери голос озвучки\n3. Выбери формат\n4. Нажми "Сгенерировать"\n5. Жди 5-10 минут',desc_en:'1. Choose category and topic\n2. Choose voice\n3. Choose format\n4. Press "Generate"\n5. Wait 5-10 minutes'},
-{ru:'🖼️ Фото',en:'🖼️ Photo',desc_ru:'1. Напиши промт\n2. Выбери модель\n3. Нажми "Сгенерировать"',desc_en:'1. Write a prompt\n2. Choose a model\n3. Press "Generate"'},
+{ru:'🖼️ Фото',en:'🖼️ Photo',desc_ru:'1. Напиши промт\n2. Выбери модель\n3. Нажми "Сгенерировать"',desc_en:'1. Write prompt\n2. Choose model\n3. Press "Generate"'},
 {ru:'🎬 AI Видео',en:'🎬 AI Video',desc_ru:'1. Напиши промт или загрузи фото\n2. Выбери модель\n3. Нажми "Продлить" для больше времени',desc_en:'1. Write prompt or upload photo\n2. Choose model\n3. Press "Extend" for more time'},
 {ru:'💎 VIP',en:'💎 VIP',desc_ru:'1. Переведи оплату на карту\n2. Напиши @Vlad_Svorob\n3. Получи VIP ключ\n4. Введи ключ в боте',desc_en:'1. Send payment\n2. Message @Vlad_Svorob\n3. Get VIP key\n4. Enter key in bot'}
 ];
@@ -261,7 +302,30 @@ return h;
 }
 
 function supportTab(){
-return`<div class="glass"><div class="section-title">💬 AI-помощник</div><div class="chat-box"><div class="chat-msg bot">👋 ${lang==='ru'?'Привет! Спроси меня что угодно.':'Hi! Ask me anything.'}</div></div><div style="display:flex;gap:6px;"><input type="text" placeholder="${lang==='ru'?'Вопрос...':'Question...'}" style="flex:1;"><button class="btn btn-primary btn-sm">➤</button></div></div>`;
+return`<div class="glass"><div class="section-title">💬 AI-помощник (обучен под NexusFlow)</div>
+<div class="chat-box" id="chatBox">
+<div class="chat-msg bot">👋 ${lang==='ru'?'Привет! Я AI-помощник NexusFlow. Я знаю всё о сервисе — как создавать видео, получить VIP, какие модели доступны. Спроси меня!':'Hi! I am NexusFlow AI assistant. I know everything — ask me about videos, VIP, models!'}</div>
+</div>
+<div style="display:flex;gap:6px;">
+<input type="text" id="chatInput" placeholder="${lang==='ru'?'Задай вопрос...':'Ask a question...'}" style="flex:1;" onkeypress="if(event.key==='Enter')sendChat()">
+<button class="btn btn-primary btn-sm" onclick="sendChat()">➤</button>
+</div>
+<p style="font-size:10px;color:var(--text2);margin-top:6px;">💡 ${lang==='ru'?'Спроси: Как создать видео? Сколько стоит VIP? Какие модели есть?':'Ask: How to create video? VIP price? What models?'}</p></div>`;
+}
+
+function sendChat(){
+const input=document.getElementById('chatInput');
+const msg=input.value.trim();
+if(!msg)return;
+const box=document.getElementById('chatBox');
+box.innerHTML+=`<div class="chat-msg user">${msg}</div>`;
+input.value='';
+box.scrollTop=box.scrollHeight;
+setTimeout(()=>{
+const reply=findBestAnswer(msg);
+box.innerHTML+=`<div class="chat-msg bot">${reply}</div>`;
+box.scrollTop=box.scrollHeight;
+},500);
 }
 
 function devTab(){
@@ -278,7 +342,7 @@ h+=`<div class="glass"><div class="section-title">📁 Файлы</div>`;
 files.forEach((f,i)=>{
 h+=`<div class="file-list-item"><div class="file-icon">${f.t==='html'?'📄':f.t==='python'?'🐍':'📝'}</div><div class="file-name">${f.n}</div><div class="file-size">${f.s}</div><div class="file-actions"><button class="btn btn-outline btn-sm" onclick="editFile(${i})">✏️</button></div></div>`;
 });
-h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v2.4</p></div>`;
+h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v2.5 — AI Помощник обучен</p></div>`;
 return h;
 }
 
@@ -286,12 +350,8 @@ function editFile(i){
 const f=files[i];
 const m=document.getElementById('modal');
 m.style.display='flex';
-m.innerHTML=`<div class="modal-content">
-<div class="section-title">✏️ ${f.n}</div>
-<div class="editor-toolbar"><button onclick="saveFile(${i})">💾 Сохранить</button><button onclick="closeModal()">❌ Отмена</button></div>
-<div class="code-editor" contenteditable="true">// ${f.n}</div></div>`;
+m.innerHTML=`<div class="modal-content"><div class="section-title">✏️ ${f.n}</div><div class="editor-toolbar"><button onclick="saveFile(${i})">💾 Сохранить</button><button onclick="closeModal()">❌ Отмена</button></div><div class="code-editor" contenteditable="true">// ${f.n}</div></div>`;
 }
-
 function saveFile(i){closeModal();tg.showPopup({message:'✅ Сохранено!'});}
 function closeModal(){document.getElementById('modal').style.display='none';}
 function selectTab(t){tab=t;document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));const el=document.querySelector(`.tab[onclick*="${t}"]`);if(el)el.classList.add('active');R();}
@@ -314,7 +374,7 @@ function generate(){
 document.getElementById('progress').style.display='block';
 const f=document.getElementById('progressFill'),l=document.getElementById('progressLabel');
 let p=0;
-const steps=lang==='ru'?['Подготовка','Сценарий','Поиск видео','Озвучка','Монтаж','Готово']:['Preparing','Script','Finding','Voice','Editing','Done'];
+const steps=lang==='ru'?['Подготовка','Сценарий','Поиск','Озвучка','Монтаж','Готово']:['Preparing','Script','Finding','Voice','Editing','Done'];
 const int=setInterval(()=>{
 p+=Math.floor(Math.random()*12)+5;
 if(p>=100){p=100;clearInterval(int);l.textContent='✅ '+(lang==='ru'?'Готово!':'Done!');}
