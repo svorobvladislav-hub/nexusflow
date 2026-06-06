@@ -100,7 +100,7 @@
     <div class="header">
         <div class="logo">🎬</div>
         <h1>NexusFlow</h1>
-        <p class="subtitle">AI Video Pipeline · v3.0</p>
+        <p class="subtitle">AI Video Pipeline · v3.1</p>
     </div>
     <div class="profile-bar">
         <div class="avatar">👤</div>
@@ -184,14 +184,14 @@ tokens:[{t:50,r:300,u:3},{t:150,r:800,u:8},{t:500,r:2000,u:20},{t:1000,r:3500,u:
 const knowledgeBase = {
 ru: {
 'привет':'👋 Привет! Я AI-помощник NexusFlow. Спроси о видео, VIP, моделях!',
-'как создать видео':'📹 **Как создать YouTube видео:**\n1. Вкладка 🎥 YT\n2. Выбери категорию\n3. Напиши тему\n4. Выбери голос\n5. Выбери формат\n6. Нажми "✨ Сгенерировать"',
-'как получить vip':'💎 **Как получить VIP:**\n1. Переведи на карту: 2204 3212 3872 2\n2. Или СБП: +79095159079\n3. Напиши @Vlad_Svorob\n4. Получи VIP ключ',
-'сколько стоит':'💰 **VIP:** 500₽/мес, 1200₽/3мес, 3500₽ навсегда\n🪙 **Токены:** 50=300₽, 150=800₽, 500=2000₽',
-'default':'Я помогу с видео, VIP, токенами, моделями. Спроси конкретнее! 😊'
+'как создать':'📹 **YouTube:**\n1. 🎥 YT\n2. Категория\n3. Тема\n4. Голос\n5. Формат\n6. "Сгенерировать"',
+'vip':'💎 **VIP:**\n1. Оплата на карту 2204321238722\n2. Напиши @Vlad_Svorob\n3. Получи ключ',
+'цена':'💰 VIP: 500₽/мес, 3500₽ навсегда\n🪙 Токены: 50=300₽',
+'default':'Я помогу с видео, VIP, токенами. Спроси! 😊'
 },
 en: {
 'hello':'👋 Hi! I am NexusFlow AI assistant.',
-'how to create video':'📹 **Create YouTube video:**\n1. 🎥 YT tab\n2. Choose category\n3. Write topic\n4. Choose voice\n5. Choose format\n6. Press "Generate"',
+'video':'📹 **YouTube:**\n1. 🎥 YT tab\n2. Category\n3. Topic\n4. Voice\n5. Format\n6. "Generate"',
 'default':'I can help with videos, VIP, tokens. Ask me! 😊'
 }
 };
@@ -219,16 +219,7 @@ if(tab==='learn')h=learnTab();
 if(tab==='support')h=supportTab();
 if(tab==='dev')h=devTab();
 c.innerHTML=h;
-
-// Показываем кнопку только на вкладках генерации
-const btnContainer = document.getElementById('generateBtnContainer');
-if(genTabs.includes(tab)){
-btnContainer.style.display = 'block';
-} else {
-btnContainer.style.display = 'none';
-}
-
-// Скрываем прогресс при смене вкладки
+document.getElementById('generateBtnContainer').style.display = genTabs.includes(tab) ? 'block' : 'none';
 document.getElementById('progress').style.display = 'none';
 }
 
@@ -238,9 +229,9 @@ function vName(v){return v[lang]||v['en'];}
 function youtubeTab(){
 let h=`<div class="glass"><div class="section-title">📂 Категория</div><select id="ycat" onchange="updateCatHelp()">`;
 categories.forEach(c=>{h+=`<option value="${c.n}">${catName(c)}</option>`;});
-h+=`</select><div class="help-box" id="catHelp">💡 ${lang==='ru'?'Выбери категорию для видео':'Choose a category'}</div></div>`;
-h+=`<div class="glass"><div class="section-title">📋 Тема</div><input type="text" placeholder="${lang==='ru'?'Опиши тему видео...':'Describe your video topic...'}"></div>`;
-h+=`<div class="glass"><div class="section-title">🎤 Голос озвучки</div><select id="voice" onchange="currentVoice=this.value">`;
+h+=`</select><div class="help-box" id="catHelp">💡 ${lang==='ru'?'Выбери категорию':'Choose category'}</div></div>`;
+h+=`<div class="glass"><div class="section-title">📋 Тема</div><input type="text" placeholder="${lang==='ru'?'Опиши тему...':'Describe topic...'}"></div>`;
+h+=`<div class="glass"><div class="section-title">🎤 Голос</div><select id="voice" onchange="currentVoice=this.value">`;
 voices.forEach(v=>{h+=`<option value="${v.n}" ${v.n===currentVoice?'selected':''}>${vName(v)}</option>`;});
 h+=`</select></div>`;
 h+=`<div class="glass"><div class="section-title">📹 Формат</div><div class="btn-row"><button class="btn btn-sm ${fmt==='h'?'btn-primary':'btn-outline'}" onclick="selectFmt('h')">📹 Гор</button><button class="btn btn-sm ${fmt==='s'?'btn-primary':'btn-outline'}" onclick="selectFmt('s')">📱 Верт</button><button class="btn btn-sm ${fmt==='b'?'btn-primary':'btn-outline'}" onclick="selectFmt('b')">🔄 Оба</button></div></div>`;
@@ -248,20 +239,20 @@ return h;
 }
 
 function photoTab(){
-return`<div class="glass"><div class="section-title">🖼️ Промт <span class="badge badge-vip">VIP/🪙5</span></div><textarea placeholder="${lang==='ru'?'Опиши что сгенерировать...':'Describe what to generate...'}"></textarea></div>
-<div class="glass"><div class="section-title">🤖 Модель (${models.photo.length})</div><div class="model-list">${models.photo.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
+return`<div class="glass"><div class="section-title">🖼️ Промт <span class="badge badge-vip">VIP/🪙5</span></div><textarea placeholder="${lang==='ru'?'Опиши что сгенерировать...':'Describe...'}"></textarea></div>
+<div class="glass"><div class="section-title">🤖 Модель (${models.photo.length})</div><div class="model-list">${models.photo.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
 }
 
 function videoTab(){
-return`<div class="glass"><div class="section-title">🎬 Промт <span class="badge badge-vip">VIP/🪙10</span></div><textarea placeholder="${lang==='ru'?'Опиши видео...':'Describe video...'}"></textarea>
+return`<div class="glass"><div class="section-title">🎬 Промт <span class="badge badge-vip">VIP/🪙10</span></div><textarea placeholder="${lang==='ru'?'Опиши видео...':'Describe...'}"></textarea>
 <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px;">📁 Загрузить фото</button></div>
-<div class="glass"><div class="section-title">🤖 Модель (${models.video.length})</div><div class="model-list">${models.video.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.d||''} · ${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
+<div class="glass"><div class="section-title">🤖 Модель (${models.video.length})</div><div class="model-list">${models.video.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.d||''} · ${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
 }
 
 function audioTab(){
 return`<div class="glass"><div class="section-title">🎤 Текст <span class="badge badge-vip">VIP/🪙3</span></div><textarea placeholder="${lang==='ru'?'Введи текст...':'Enter text...'}"></textarea></div>
 <div class="glass"><div class="section-title">🗣️ Голос</div><select>${voices.map(v=>`<option value="${v.n}">${vName(v)}</option>`).join('')}</select></div>
-<div class="glass"><div class="section-title">🤖 Модель (${models.audio.length})</div><div class="model-list">${models.audio.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
+<div class="glass"><div class="section-title">🤖 Модель (${models.audio.length})</div><div class="model-list">${models.audio.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
 }
 
 function buyTab(){
@@ -285,85 +276,61 @@ return`<div class="glass"><div class="section-title">👥 Рефералы</div>
 function learnTab(){
 let h=`<div class="glass"><div class="section-title">📚 Обучение</div>`;
 const guides=[
-{ru:'🎥 YouTube видео',en:'🎥 YouTube Video',desc_ru:'1. Выбери категорию\n2. Напиши тему\n3. Выбери голос\n4. Выбери формат\n5. Нажми "Сгенерировать"',desc_en:'1. Choose category\n2. Write topic\n3. Choose voice\n4. Choose format\n5. Press "Generate"'},
-{ru:'💎 VIP',en:'💎 VIP',desc_ru:'1. Переведи на карту\n2. Напиши @Vlad_Svorob\n3. Получи ключ',desc_en:'1. Send payment\n2. Message @Vlad_Svorob\n3. Get key'}
+{ru:'🎥 YouTube видео',en:'🎥 YouTube Video',desc_ru:'1. Категория\n2. Тема\n3. Голос\n4. Формат\n5. "Сгенерировать"',desc_en:'1. Category\n2. Topic\n3. Voice\n4. Format\n5. "Generate"'},
+{ru:'💎 VIP',en:'💎 VIP',desc_ru:'1. Оплата на карту\n2. Напиши @Vlad_Svorob\n3. Получи ключ',desc_en:'1. Pay\n2. Message @Vlad_Svorob\n3. Get key'}
 ];
-guides.forEach(g=>{
-h+=`<div class="glass"><div class="section-title">${g[lang]||g['en']}</div><p style="font-size:12px;white-space:pre-line;">${g['desc_'+lang]||g['desc_en']}</p></div>`;
-});
+guides.forEach(g=>{h+=`<div class="glass"><div class="section-title">${g[lang]||g['en']}</div><p style="font-size:12px;white-space:pre-line;">${g['desc_'+lang]||g['desc_en']}</p></div>`;});
 return h;
 }
 
 function supportTab(){
 return`<div class="glass"><div class="section-title">💬 AI-помощник</div>
-<div class="chat-box" id="chatBox">
-<div class="chat-msg bot">👋 ${lang==='ru'?'Привет! Спроси меня о NexusFlow!':'Hi! Ask me about NexusFlow!'}</div>
-</div>
-<div style="display:flex;gap:6px;">
-<input type="text" id="chatInput" placeholder="${lang==='ru'?'Задай вопрос...':'Ask...'}" style="flex:1;" onkeypress="if(event.key==='Enter')sendChat()">
-<button class="btn btn-primary btn-sm" onclick="sendChat()">➤</button>
-</div></div>`;
+<div class="chat-box" id="chatBox"><div class="chat-msg bot">👋 ${lang==='ru'?'Привет! Спроси меня!':'Hi! Ask me!'}</div></div>
+<div style="display:flex;gap:6px;"><input type="text" id="chatInput" placeholder="${lang==='ru'?'Вопрос...':'Ask...'}" style="flex:1;" onkeypress="if(event.key==='Enter')sendChat()"><button class="btn btn-primary btn-sm" onclick="sendChat()">➤</button></div></div>`;
 }
 
 function sendChat(){
-const input=document.getElementById('chatInput');
-const msg=input.value.trim();
-if(!msg)return;
-const box=document.getElementById('chatBox');
-box.innerHTML+=`<div class="chat-msg user">${msg}</div>`;
-input.value='';
-box.scrollTop=box.scrollHeight;
-setTimeout(()=>{
-box.innerHTML+=`<div class="chat-msg bot">${findBestAnswer(msg)}</div>`;
-box.scrollTop=box.scrollHeight;
-},500);
+const input=document.getElementById('chatInput');const msg=input.value.trim();if(!msg)return;
+const box=document.getElementById('chatBox');box.innerHTML+=`<div class="chat-msg user">${msg}</div>`;input.value='';box.scrollTop=box.scrollHeight;
+setTimeout(()=>{box.innerHTML+=`<div class="chat-msg bot">${findBestAnswer(msg)}</div>`;box.scrollTop=box.scrollHeight;},500);
 }
 
 function devTab(){
 let h=`<div class="glass"><div class="section-title">🛠️ Dev-панель</div>`;
 if(!devMode){
-h+=`<div class="lock-screen">
-<div class="lock-icon">🔒</div>
+h+=`<div class="lock-screen"><div class="lock-icon">🔒</div>
 <div class="lock-title">${lang==='ru'?'Доступ ограничен':'Access Restricted'}</div>
 <div class="lock-desc">${lang==='ru'?'Введи ключ разработчика':'Enter developer key'}</div>
-<input type="text" id="devKeyInput" placeholder="DEV-ключ..." style="text-align:center;">
-<button class="btn btn-gold btn-sm" style="width:100%;margin-top:12px;" onclick="checkDevKey()">🔓 ${lang==='ru'?'Разблокировать':'Unlock'}</button>
-<p style="font-size:10px;color:var(--text2);margin-top:10px;">${lang==='ru'?'Нет ключа? Напиши @Vlad_Svorob':'No key? Message @Vlad_Svorob'}</p>
-</div></div>`;
+<input type="text" id="devKeyInput" placeholder="DEV-ключ..." style="text-align:center;margin-bottom:12px;">
+<button class="btn btn-gold btn-sm" style="width:100%;" onclick="checkDevKey()">🔓 ${lang==='ru'?'Разблокировать':'Unlock'}</button>
+<p style="font-size:10px;color:var(--text2);margin-top:10px;">${lang==='ru'?'Нет ключа? Напиши @Vlad_Svorob':'No key? Message @Vlad_Svorob'}</p></div></div>`;
 return h;
 }
-h+=`<div class="stats-grid">
-<div class="stat-card"><div class="stat-value stat-accent">156</div><div class="stat-label">${lang==='ru'?'Пользователей':'Users'}</div></div>
-<div class="stat-card"><div class="stat-value stat-gold">23</div><div class="stat-label">VIP</div></div>
-<div class="stat-card"><div class="stat-value">142</div><div class="stat-label">${lang==='ru'?'Генераций':'Generations'}</div></div>
-<div class="stat-card"><div class="stat-value">8/8</div><div class="stat-label">${lang==='ru'?'Моделей':'Models'}</div></div>
-</div>
-<input type="text" placeholder="${lang==='ru'?'Новый VIP-ключ...':'New VIP key...'}" style="margin-top:8px;">
-<button class="btn btn-gold btn-sm" style="width:100%;margin-top:6px;">➕ ${lang==='ru'?'Создать ключ':'Create Key'}</button>
-<button class="btn btn-red btn-sm" style="width:100%;margin-top:6px;" onclick="devMode=false;R();">🔒 ${lang==='ru'?'Выйти':'Exit Dev'}</button></div>`;
-h+=`<div class="glass"><div class="section-title">📁 ${lang==='ru'?'Файлы':'Files'}</div>`;
-files.forEach((f,i)=>{
-h+=`<div class="file-list-item"><div class="file-icon">${f.t==='html'?'📄':f.t==='python'?'🐍':'📝'}</div><div class="file-name">${f.n}</div><div class="file-size">${f.s}</div><div class="file-actions"><button class="btn btn-outline btn-sm" onclick="editFile(${i})">✏️</button></div></div>`;
-});
-h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v3.0 — Fixed</p></div>`;
+h+=`<div class="stats-grid"><div class="stat-card"><div class="stat-value stat-accent">156</div><div class="stat-label">Пользователей</div></div><div class="stat-card"><div class="stat-value stat-gold">23</div><div class="stat-label">VIP</div></div><div class="stat-card"><div class="stat-value">142</div><div class="stat-label">Генераций</div></div><div class="stat-card"><div class="stat-value">8/8</div><div class="stat-label">Моделей</div></div></div>
+<input type="text" placeholder="Новый VIP-ключ..." style="margin-top:8px;"><button class="btn btn-gold btn-sm" style="width:100%;margin-top:6px;">➕ Создать ключ</button>
+<button class="btn btn-red btn-sm" style="width:100%;margin-top:6px;" onclick="devMode=false;R();">🔒 Выйти</button></div>
+<div class="glass"><div class="section-title">📁 Файлы</div>`;
+files.forEach((f,i)=>{h+=`<div class="file-list-item"><div class="file-icon">${f.t==='html'?'📄':f.t==='python'?'🐍':'📝'}</div><div class="file-name">${f.n}</div><div class="file-size">${f.s}</div><div class="file-actions"><button class="btn btn-outline btn-sm" onclick="editFile(${i})">✏️</button></div></div>`;});
+h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v3.1 — Dev Lock Fixed</p></div>`;
 return h;
 }
 
 function checkDevKey(){
-const key=document.getElementById('devKeyInput').value.trim();
-if(DEV_KEYS.includes(key)){
-devMode=true;
-tg.showPopup({message:'✅ Доступ разрешён!'});
-R();
-}else{
-tg.showPopup({message:'❌ Неверный ключ'});
+const keyInput = document.getElementById('devKeyInput');
+if (!keyInput) return;
+const key = keyInput.value.trim();
+if (!key) { tg.showPopup({message: '❌ Введи ключ!'}); return; }
+if (DEV_KEYS.includes(key)) {
+devMode = true;
+tg.showPopup({message: '✅ Доступ разрешён!'});
+setTimeout(() => { R(); }, 300);
+} else {
+tg.showPopup({message: '❌ Неверный ключ'});
 }
 }
 
 function editFile(i){
-const f=files[i];
-const m=document.getElementById('modal');
-m.style.display='flex';
+const f=files[i];const m=document.getElementById('modal');m.style.display='flex';
 m.innerHTML=`<div class="modal-content"><div class="section-title">✏️ ${f.n}</div><div class="editor-toolbar"><button onclick="saveFile(${i})">💾 Сохранить</button><button onclick="closeModal()">❌ Отмена</button></div><div class="code-editor" contenteditable="true">// ${f.n}</div></div>`;
 }
 function saveFile(i){closeModal();tg.showPopup({message:'✅ Сохранено!'});}
@@ -374,26 +341,15 @@ function setLang(l){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.c
 function buyItem(i){tg.openTelegramLink('https://t.me/'+telegramUser);}
 function copyText(t){navigator.clipboard.writeText(t);tg.showPopup({message:'✅ Скопировано!'});}
 function updateCatHelp(){
-const cat=document.getElementById('ycat')?.value;
-const c=categories.find(x=>x.n===cat);
-if(c){
-document.getElementById('catHelp').innerHTML='💡 '+(lang==='ru'?
-`Музыка: ${c.music} | Озвучка: ${c.voice==='none'?'нет':c.voice}`:
-`Music: ${c.music} | Voice: ${c.voice==='none'?'none':c.voice}`);
-}
+const cat=document.getElementById('ycat')?.value;const c=categories.find(x=>x.n===cat);
+if(c){document.getElementById('catHelp').innerHTML='💡 '+(lang==='ru'?`Музыка: ${c.music} | Озвучка: ${c.voice==='none'?'нет':c.voice}`:`Music: ${c.music} | Voice: ${c.voice==='none'?'none':c.voice}`);}
 }
 
 function generate(){
 document.getElementById('progress').style.display='block';
-const f=document.getElementById('progressFill'),l=document.getElementById('progressLabel');
-let p=0;
+const f=document.getElementById('progressFill'),l=document.getElementById('progressLabel');let p=0;
 const steps=lang==='ru'?['Подготовка','Сценарий','Поиск','Озвучка','Монтаж','Готово']:['Preparing','Script','Finding','Voice','Editing','Done'];
-const int=setInterval(()=>{
-p+=Math.floor(Math.random()*12)+5;
-if(p>=100){p=100;clearInterval(int);l.textContent='✅ '+(lang==='ru'?'Готово!':'Done!');}
-else{l.textContent=steps[Math.floor(p/20)]+' · '+p+'%';}
-f.style.width=p+'%';
-},600);
+const int=setInterval(()=>{p+=Math.floor(Math.random()*12)+5;if(p>=100){p=100;clearInterval(int);l.textContent='✅ '+(lang==='ru'?'Готово!':'Done!');}else{l.textContent=steps[Math.floor(p/20)]+' · '+p+'%';}f.style.width=p+'%';},600);
 }
 
 R();
