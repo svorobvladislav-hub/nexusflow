@@ -73,11 +73,10 @@
         .card-info { background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; font-size:18px; letter-spacing:2px; font-weight:600; margin:8px 0; user-select:all; }
         .copy-btn { background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:10px; cursor:pointer; font-size:12px; width:100%; }
         .help-box { background:rgba(10,132,255,0.1); border:1px solid rgba(10,132,255,0.2); border-radius:12px; padding:12px; margin-top:8px; font-size:12px; color:var(--accent); }
-        .avatar-helper { position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:30px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:30px; box-shadow:0 4px 20px rgba(10,132,255,0.4); cursor:pointer; z-index:50; animation:bounce 2s infinite; }
-        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        @keyframes slideUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-        .generating { animation:pulse 1.5s infinite; }
+        .lock-screen { text-align:center; padding:30px 20px; }
+        .lock-screen .lock-icon { font-size:60px; margin-bottom:16px; }
+        .lock-screen .lock-title { font-size:18px; font-weight:700; margin-bottom:8px; }
+        .lock-screen .lock-desc { font-size:13px; color:var(--text2); margin-bottom:20px; }
         .file-list-item { display:flex; align-items:center; gap:8px; padding:10px; border-bottom:1px solid var(--border); }
         .file-list-item .file-icon { font-size:18px; } .file-list-item .file-name { flex:1; font-size:13px; } .file-list-item .file-size { font-size:10px; color:var(--text2); }
         .modal { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:100; display:flex; align-items:center; justify-content:center; }
@@ -85,10 +84,10 @@
         .editor-toolbar { display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap; }
         .editor-toolbar button { padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--glass); color:var(--text2); cursor:pointer; font-size:10px; }
         .code-editor { background:var(--editor-bg); border:1px solid var(--border); border-radius:12px; padding:12px; font-family:'SF Mono',monospace; font-size:11px; line-height:1.6; color:#e2e8f0; min-height:200px; resize:vertical; overflow:auto; }
-        .lock-screen { text-align:center; padding:30px 20px; }
-        .lock-screen .lock-icon { font-size:60px; margin-bottom:16px; }
-        .lock-screen .lock-title { font-size:18px; font-weight:700; margin-bottom:8px; }
-        .lock-screen .lock-desc { font-size:13px; color:var(--text2); margin-bottom:20px; }
+        .generate-btn-container { padding: 0 0 20px 0; }
+        @keyframes slideUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .generating { animation:pulse 1.5s infinite; }
     </style>
 </head>
 <body>
@@ -101,7 +100,7 @@
     <div class="header">
         <div class="logo">🎬</div>
         <h1>NexusFlow</h1>
-        <p class="subtitle">AI Video Pipeline · v2.6</p>
+        <p class="subtitle">AI Video Pipeline · v3.0</p>
     </div>
     <div class="profile-bar">
         <div class="avatar">👤</div>
@@ -123,7 +122,9 @@
         <button class="tab dev" onclick="selectTab('dev')">🛠️</button>
     </div>
     <div id="content"></div>
-    <button class="btn btn-primary" onclick="generate()" style="margin-top:12px;">✨ Сгенерировать</button>
+    <div class="generate-btn-container" id="generateBtnContainer" style="display:none;">
+        <button class="btn btn-primary" onclick="generate()">✨ Сгенерировать</button>
+    </div>
     <div id="progress" style="display:none;margin-top:12px;">
         <div class="glass">
             <div class="generating" id="progressLabel">Подготовка...</div>
@@ -132,11 +133,10 @@
     </div>
 </div>
 <div id="modal" class="modal" style="display:none;"></div>
-<div class="avatar-helper" onclick="toggleHelper()" id="helperBtn">🤖</div>
 
 <script>
 const tg=window.Telegram.WebApp;tg.expand();tg.ready();
-let lang='ru',tab='youtube',fmt='b',helperActive=true,currentVoice='auto',devMode=false;
+let lang='ru',tab='youtube',fmt='b',currentVoice='auto',devMode=false;
 
 const cardNumber='2204321238722',phoneNumber='+79095159079',bankName='Ozon Bank',telegramUser='Vlad_Svorob';
 const DEV_KEYS=['NEXUS-DEV-001','nexus-dev-2024','nxdev'];
@@ -157,7 +157,7 @@ const categories=[
 ];
 
 const voices=[
-{n:'auto',ru:'🤖 Авто (по языку)',en:'🤖 Auto (by language)'},
+{n:'auto',ru:'🤖 Авто (по языку)',en:'🤖 Auto'},
 {n:'male_us',ru:'👨 🇺🇸 Мужской (США)',en:'👨 🇺🇸 Male (US)'},
 {n:'female_us',ru:'👩 🇺🇸 Женский (США)',en:'👩 🇺🇸 Female (US)'},
 {n:'male_uk',ru:'👨 🇬🇧 Британский',en:'👨 🇬🇧 British'},
@@ -183,42 +183,28 @@ tokens:[{t:50,r:300,u:3},{t:150,r:800,u:8},{t:500,r:2000,u:20},{t:1000,r:3500,u:
 
 const knowledgeBase = {
 ru: {
-'привет':'👋 Привет! Я AI-помощник NexusFlow. Спроси о создании видео, VIP, токенах или моделях!',
-'как создать видео':'📹 **Как создать YouTube видео:**\n1. Вкладка 🎥 YT\n2. Выбери категорию\n3. Напиши тему\n4. Выбери голос\n5. Выбери формат\n6. Нажми "✨ Сгенерировать"\n7. Жди 5-10 минут',
+'привет':'👋 Привет! Я AI-помощник NexusFlow. Спроси о видео, VIP, моделях!',
+'как создать видео':'📹 **Как создать YouTube видео:**\n1. Вкладка 🎥 YT\n2. Выбери категорию\n3. Напиши тему\n4. Выбери голос\n5. Выбери формат\n6. Нажми "✨ Сгенерировать"',
 'как получить vip':'💎 **Как получить VIP:**\n1. Переведи на карту: 2204 3212 3872 2\n2. Или СБП: +79095159079\n3. Напиши @Vlad_Svorob\n4. Получи VIP ключ',
 'сколько стоит':'💰 **VIP:** 500₽/мес, 1200₽/3мес, 3500₽ навсегда\n🪙 **Токены:** 50=300₽, 150=800₽, 500=2000₽',
-'какие модели':'🤖 **8 фото:** Gemini, Flux, SD, SDXL, Copilot, ChatGPT, Midjourney, Leonardo\n🎬 **9 видео:** YouTube+CLIP, CogVideoX, EasyAnimate, SVD, Zeroscope, Modelscope, I2VGen-XL, Pika, Runway\n🎤 **4 звука:** Google TTS, Edge TTS, gTTS, ElevenLabs',
-'какие категории':'📂 **12 категорий:** Drift, Race, Build, Parking, Gaming, Tech, Cooking, Sports, Travel, Animals, Education, DIY',
-'какие голоса':'🎤 **9 голосов:** М/Ж US/UK/RU/DE/ES + Авто',
-'рефералы':'👥 **Рефералы:** Пригласи друга → +10🪙 тебе, +5🪙 другу. Купит VIP → +50🪙',
-'ошибка':'⚠️ Проверь интернет, бота (/start), GitHub Pages. Напиши @Vlad_Svorob',
-'токены':'🪙 Трать на: Фото 5, Звук 3, Видео 10. Зарабатывай приглашая друзей.',
-'dev':'🛠️ Dev-панель по ключу. Команды: /genkey, /addtokens, /ban, /stats',
 'default':'Я помогу с видео, VIP, токенами, моделями. Спроси конкретнее! 😊'
 },
 en: {
-'hello':'👋 Hi! I am NexusFlow AI assistant. Ask me about videos, VIP, tokens or models!',
-'how to create video':'📹 **Create YouTube video:**\n1. 🎥 YT tab\n2. Choose category\n3. Write topic\n4. Choose voice\n5. Choose format\n6. Press "Generate"\n7. Wait 5-10 min',
-'how to get vip':'💎 **Get VIP:**\n1. Send payment to card\n2. Message @Vlad_Svorob\n3. Get VIP key',
-'price':'💰 **VIP:** $5/mo, $12/3mo, $35 forever\n🪙 **Tokens:** 50=$3, 150=$8, 500=$20',
-'models':'🤖 **8 Photo:** Gemini, Flux, SD...\n🎬 **9 Video:** YouTube+CLIP, CogVideoX...\n🎤 **4 Audio:** Google TTS, Edge TTS...',
-'categories':'📂 **12 categories:** Drift, Race, Build, Parking, Gaming, Tech, Cooking, Sports, Travel, Animals, Education, DIY',
-'voices':'🎤 **9 voices:** M/F US/UK/RU/DE/ES + Auto',
-'referrals':'👥 Invite friend → +10🪙 you, +5🪙 them. VIP purchase → +50🪙',
-'error':'⚠️ Check internet, bot (/start), GitHub Pages. Message @Vlad_Svorob',
-'tokens':'🪙 Spend: Photo 5, Audio 3, Video 10. Earn by inviting friends.',
-'default':'I can help with videos, VIP, tokens, models. Ask me! 😊'
+'hello':'👋 Hi! I am NexusFlow AI assistant.',
+'how to create video':'📹 **Create YouTube video:**\n1. 🎥 YT tab\n2. Choose category\n3. Write topic\n4. Choose voice\n5. Choose format\n6. Press "Generate"',
+'default':'I can help with videos, VIP, tokens. Ask me! 😊'
 }
 };
 
 function findBestAnswer(q){
 const kb = knowledgeBase[lang] || knowledgeBase['ru'];
-const qLower = q.toLowerCase();
 for(const [key, val] of Object.entries(kb)){
-if(qLower.includes(key)) return val;
+if(q.toLowerCase().includes(key)) return val;
 }
 return kb['default'];
 }
+
+const genTabs = ['youtube', 'photo', 'audio', 'video'];
 
 function R(){render();}
 function render(){
@@ -233,6 +219,17 @@ if(tab==='learn')h=learnTab();
 if(tab==='support')h=supportTab();
 if(tab==='dev')h=devTab();
 c.innerHTML=h;
+
+// Показываем кнопку только на вкладках генерации
+const btnContainer = document.getElementById('generateBtnContainer');
+if(genTabs.includes(tab)){
+btnContainer.style.display = 'block';
+} else {
+btnContainer.style.display = 'none';
+}
+
+// Скрываем прогресс при смене вкладки
+document.getElementById('progress').style.display = 'none';
 }
 
 function catName(c){return c[lang]||c['en'];}
@@ -241,9 +238,9 @@ function vName(v){return v[lang]||v['en'];}
 function youtubeTab(){
 let h=`<div class="glass"><div class="section-title">📂 Категория</div><select id="ycat" onchange="updateCatHelp()">`;
 categories.forEach(c=>{h+=`<option value="${c.n}">${catName(c)}</option>`;});
-h+=`</select><div class="help-box" id="catHelp">💡 ${lang==='ru'?'Выбери категорию':'Choose category'}</div></div>`;
-h+=`<div class="glass"><div class="section-title">📋 Тема</div><input type="text" placeholder="${lang==='ru'?'Опиши тему...':'Describe topic...'}"></div>`;
-h+=`<div class="glass"><div class="section-title">🎤 Голос</div><select id="voice" onchange="currentVoice=this.value">`;
+h+=`</select><div class="help-box" id="catHelp">💡 ${lang==='ru'?'Выбери категорию для видео':'Choose a category'}</div></div>`;
+h+=`<div class="glass"><div class="section-title">📋 Тема</div><input type="text" placeholder="${lang==='ru'?'Опиши тему видео...':'Describe your video topic...'}"></div>`;
+h+=`<div class="glass"><div class="section-title">🎤 Голос озвучки</div><select id="voice" onchange="currentVoice=this.value">`;
 voices.forEach(v=>{h+=`<option value="${v.n}" ${v.n===currentVoice?'selected':''}>${vName(v)}</option>`;});
 h+=`</select></div>`;
 h+=`<div class="glass"><div class="section-title">📹 Формат</div><div class="btn-row"><button class="btn btn-sm ${fmt==='h'?'btn-primary':'btn-outline'}" onclick="selectFmt('h')">📹 Гор</button><button class="btn btn-sm ${fmt==='s'?'btn-primary':'btn-outline'}" onclick="selectFmt('s')">📱 Верт</button><button class="btn btn-sm ${fmt==='b'?'btn-primary':'btn-outline'}" onclick="selectFmt('b')">🔄 Оба</button></div></div>`;
@@ -288,10 +285,8 @@ return`<div class="glass"><div class="section-title">👥 Рефералы</div>
 function learnTab(){
 let h=`<div class="glass"><div class="section-title">📚 Обучение</div>`;
 const guides=[
-{ru:'🎥 YouTube видео',en:'🎥 YouTube Video',desc_ru:'1. Выбери категорию и тему\n2. Выбери голос озвучки\n3. Выбери формат\n4. Нажми "Сгенерировать"\n5. Жди 5-10 минут',desc_en:'1. Choose category and topic\n2. Choose voice\n3. Choose format\n4. Press "Generate"\n5. Wait 5-10 minutes'},
-{ru:'🖼️ Фото',en:'🖼️ Photo',desc_ru:'1. Напиши промт\n2. Выбери модель\n3. Нажми "Сгенерировать"',desc_en:'1. Write prompt\n2. Choose model\n3. Press "Generate"'},
-{ru:'🎬 AI Видео',en:'🎬 AI Video',desc_ru:'1. Напиши промт или загрузи фото\n2. Выбери модель\n3. Нажми "Продлить" для больше времени',desc_en:'1. Write prompt or upload photo\n2. Choose model\n3. Press "Extend" for more time'},
-{ru:'💎 VIP',en:'💎 VIP',desc_ru:'1. Переведи оплату на карту\n2. Напиши @Vlad_Svorob\n3. Получи VIP ключ\n4. Введи ключ в боте',desc_en:'1. Send payment\n2. Message @Vlad_Svorob\n3. Get VIP key\n4. Enter key in bot'}
+{ru:'🎥 YouTube видео',en:'🎥 YouTube Video',desc_ru:'1. Выбери категорию\n2. Напиши тему\n3. Выбери голос\n4. Выбери формат\n5. Нажми "Сгенерировать"',desc_en:'1. Choose category\n2. Write topic\n3. Choose voice\n4. Choose format\n5. Press "Generate"'},
+{ru:'💎 VIP',en:'💎 VIP',desc_ru:'1. Переведи на карту\n2. Напиши @Vlad_Svorob\n3. Получи ключ',desc_en:'1. Send payment\n2. Message @Vlad_Svorob\n3. Get key'}
 ];
 guides.forEach(g=>{
 h+=`<div class="glass"><div class="section-title">${g[lang]||g['en']}</div><p style="font-size:12px;white-space:pre-line;">${g['desc_'+lang]||g['desc_en']}</p></div>`;
@@ -300,15 +295,14 @@ return h;
 }
 
 function supportTab(){
-return`<div class="glass"><div class="section-title">💬 AI-помощник (обучен под NexusFlow)</div>
+return`<div class="glass"><div class="section-title">💬 AI-помощник</div>
 <div class="chat-box" id="chatBox">
-<div class="chat-msg bot">👋 ${lang==='ru'?'Привет! Я AI-помощник NexusFlow. Спроси о видео, VIP, моделях!':'Hi! I am NexusFlow AI assistant. Ask me about videos, VIP, models!'}</div>
+<div class="chat-msg bot">👋 ${lang==='ru'?'Привет! Спроси меня о NexusFlow!':'Hi! Ask me about NexusFlow!'}</div>
 </div>
 <div style="display:flex;gap:6px;">
-<input type="text" id="chatInput" placeholder="${lang==='ru'?'Задай вопрос...':'Ask a question...'}" style="flex:1;" onkeypress="if(event.key==='Enter')sendChat()">
+<input type="text" id="chatInput" placeholder="${lang==='ru'?'Задай вопрос...':'Ask...'}" style="flex:1;" onkeypress="if(event.key==='Enter')sendChat()">
 <button class="btn btn-primary btn-sm" onclick="sendChat()">➤</button>
-</div>
-<p style="font-size:10px;color:var(--text2);margin-top:6px;">💡 ${lang==='ru'?'Спроси: Как создать видео? Сколько стоит VIP?':'Ask: How to create video? VIP price?'}</p></div>`;
+</div></div>`;
 }
 
 function sendChat(){
@@ -320,8 +314,7 @@ box.innerHTML+=`<div class="chat-msg user">${msg}</div>`;
 input.value='';
 box.scrollTop=box.scrollHeight;
 setTimeout(()=>{
-const reply=findBestAnswer(msg);
-box.innerHTML+=`<div class="chat-msg bot">${reply}</div>`;
+box.innerHTML+=`<div class="chat-msg bot">${findBestAnswer(msg)}</div>`;
 box.scrollTop=box.scrollHeight;
 },500);
 }
@@ -332,19 +325,18 @@ if(!devMode){
 h+=`<div class="lock-screen">
 <div class="lock-icon">🔒</div>
 <div class="lock-title">${lang==='ru'?'Доступ ограничен':'Access Restricted'}</div>
-<div class="lock-desc">${lang==='ru'?'Введи ключ разработчика для доступа к Dev-панели':'Enter developer key to access Dev Panel'}</div>
+<div class="lock-desc">${lang==='ru'?'Введи ключ разработчика':'Enter developer key'}</div>
 <input type="text" id="devKeyInput" placeholder="DEV-ключ..." style="text-align:center;">
 <button class="btn btn-gold btn-sm" style="width:100%;margin-top:12px;" onclick="checkDevKey()">🔓 ${lang==='ru'?'Разблокировать':'Unlock'}</button>
 <p style="font-size:10px;color:var(--text2);margin-top:10px;">${lang==='ru'?'Нет ключа? Напиши @Vlad_Svorob':'No key? Message @Vlad_Svorob'}</p>
-</div>`;
-h+=`</div>`;
+</div></div>`;
 return h;
 }
 h+=`<div class="stats-grid">
-<div class="stat-card"><div class="stat-value stat-accent" id="devUsers">156</div><div class="stat-label">${lang==='ru'?'Пользователей':'Users'}</div></div>
-<div class="stat-card"><div class="stat-value stat-gold" id="devVIP">23</div><div class="stat-label">VIP</div></div>
-<div class="stat-card"><div class="stat-value" id="devGens">142</div><div class="stat-label">${lang==='ru'?'Генераций':'Generations'}</div></div>
-<div class="stat-card"><div class="stat-value" id="devModels">8/8</div><div class="stat-label">${lang==='ru'?'Моделей':'Models'}</div></div>
+<div class="stat-card"><div class="stat-value stat-accent">156</div><div class="stat-label">${lang==='ru'?'Пользователей':'Users'}</div></div>
+<div class="stat-card"><div class="stat-value stat-gold">23</div><div class="stat-label">VIP</div></div>
+<div class="stat-card"><div class="stat-value">142</div><div class="stat-label">${lang==='ru'?'Генераций':'Generations'}</div></div>
+<div class="stat-card"><div class="stat-value">8/8</div><div class="stat-label">${lang==='ru'?'Моделей':'Models'}</div></div>
 </div>
 <input type="text" placeholder="${lang==='ru'?'Новый VIP-ключ...':'New VIP key...'}" style="margin-top:8px;">
 <button class="btn btn-gold btn-sm" style="width:100%;margin-top:6px;">➕ ${lang==='ru'?'Создать ключ':'Create Key'}</button>
@@ -353,7 +345,7 @@ h+=`<div class="glass"><div class="section-title">📁 ${lang==='ru'?'Файлы
 files.forEach((f,i)=>{
 h+=`<div class="file-list-item"><div class="file-icon">${f.t==='html'?'📄':f.t==='python'?'🐍':'📝'}</div><div class="file-name">${f.n}</div><div class="file-size">${f.s}</div><div class="file-actions"><button class="btn btn-outline btn-sm" onclick="editFile(${i})">✏️</button></div></div>`;
 });
-h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v2.6 — Dev Lock</p></div>`;
+h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v3.0 — Fixed</p></div>`;
 return h;
 }
 
@@ -381,7 +373,6 @@ function selectFmt(f){fmt=f;R();}
 function setLang(l){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');R();}
 function buyItem(i){tg.openTelegramLink('https://t.me/'+telegramUser);}
 function copyText(t){navigator.clipboard.writeText(t);tg.showPopup({message:'✅ Скопировано!'});}
-function toggleHelper(){helperActive=!helperActive;document.getElementById('helperBtn').style.opacity=helperActive?'1':'0.3';}
 function updateCatHelp(){
 const cat=document.getElementById('ycat')?.value;
 const c=categories.find(x=>x.n===cat);
