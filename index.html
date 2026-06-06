@@ -48,6 +48,7 @@
         .btn-outline { background:transparent; border:1px solid var(--accent); color:var(--accent); }
         .btn:active { transform:scale(0.97); }
         .btn-sm { width:auto; padding:10px 16px; font-size:13px; border-radius:12px; }
+        .btn-xs { width:auto; padding:8px 12px; font-size:11px; border-radius:8px; }
         .btn-row { display:flex; gap:8px; } .btn-row .btn { flex:1; }
         .badge { display:inline-block; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:700; }
         .badge-vip { background:var(--gold); color:#000; } .badge-dev { background:var(--red); color:#fff; } .badge-free { background:var(--glass); color:var(--text2); }
@@ -85,6 +86,8 @@
         .editor-toolbar button { padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--glass); color:var(--text2); cursor:pointer; font-size:10px; }
         .code-editor { background:var(--editor-bg); border:1px solid var(--border); border-radius:12px; padding:12px; font-family:'SF Mono',monospace; font-size:11px; line-height:1.6; color:#e2e8f0; min-height:200px; resize:vertical; overflow:auto; }
         .generate-btn-container { padding: 0 0 20px 0; }
+        .extend-bar { display:flex; gap:6px; align-items:center; margin-top:8px; }
+        .extend-bar .extend-count { background:var(--glass); padding:6px 12px; border-radius:20px; font-size:12px; color:var(--text2); }
         @keyframes slideUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
         .generating { animation:pulse 1.5s infinite; }
@@ -100,7 +103,7 @@
     <div class="header">
         <div class="logo">🎬</div>
         <h1>NexusFlow</h1>
-        <p class="subtitle">AI Video Pipeline · v3.1</p>
+        <p class="subtitle">AI Video Pipeline · v3.2</p>
     </div>
     <div class="profile-bar">
         <div class="avatar">👤</div>
@@ -137,6 +140,7 @@
 <script>
 const tg=window.Telegram.WebApp;tg.expand();tg.ready();
 let lang='ru',tab='youtube',fmt='b',currentVoice='auto',devMode=false;
+let videoExtensions=0, maxExtensions=5;
 
 const cardNumber='2204321238722',phoneNumber='+79095159079',bankName='Ozon Bank',telegramUser='Vlad_Svorob';
 const DEV_KEYS=['NEXUS-DEV-001','nexus-dev-2024','nxdev'];
@@ -174,7 +178,7 @@ video:[{n:'YouTube+CLIP',s:'green',d:'5-15мин'},{n:'CogVideoX',s:'green',d:'6
 audio:[{n:'Google TTS',s:'green'},{n:'Edge TTS',s:'green'},{n:'gTTS',s:'green'},{n:'ElevenLabs',s:'red'}]
 };
 
-const files=[{n:'index.html',s:'20 KB',t:'html'},{n:'bot.py',s:'8 KB',t:'python'},{n:'requirements.txt',s:'0.3 KB',t:'text'},{n:'Dockerfile',s:'0.4 KB',t:'docker'}];
+const files=[{n:'index.html',s:'21 KB',t:'html'},{n:'bot.py',s:'8 KB',t:'python'},{n:'requirements.txt',s:'0.3 KB',t:'text'},{n:'Dockerfile',s:'0.4 KB',t:'docker'}];
 
 const prices={
 vip:[{d:'1 месяц',r:500,u:5},{d:'2 месяца',r:900,u:9},{d:'3 месяца',r:1200,u:12},{d:'6 месяцев',r:2000,u:20},{d:'Навсегда',r:3500,u:35}],
@@ -244,9 +248,30 @@ return`<div class="glass"><div class="section-title">🖼️ Промт <span cl
 }
 
 function videoTab(){
-return`<div class="glass"><div class="section-title">🎬 Промт <span class="badge badge-vip">VIP/🪙10</span></div><textarea placeholder="${lang==='ru'?'Опиши видео...':'Describe...'}"></textarea>
+let h=`<div class="glass"><div class="section-title">🎬 Промт или фото <span class="badge badge-vip">VIP/🪙10</span></div><textarea placeholder="${lang==='ru'?'Опиши видео...':'Describe video...'}"></textarea>
 <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px;">📁 Загрузить фото</button></div>
 <div class="glass"><div class="section-title">🤖 Модель (${models.video.length})</div><div class="model-list">${models.video.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.d||''} · ${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
+h+=`<div class="glass"><div class="section-title">⏱️ Продление видео</div>
+<div class="extend-bar">
+<span class="extend-count">📹 ${videoExtensions * 6}с / ${maxExtensions * 6}с</span>
+<button class="btn btn-outline btn-xs" onclick="extendVideo()" style="flex:1;">🔄 Продлить +6с</button>
+<button class="btn btn-outline btn-xs" onclick="addPromptToVideo()" style="flex:1;">📝 Добавить промт</button>
+</div>
+<p style="font-size:10px;color:var(--text2);margin-top:6px;">Бесплатно: 5 продлений | VIP: безлимит</p></div>`;
+return h;
+}
+
+function extendVideo(){
+if(videoExtensions >= maxExtensions){
+tg.showPopup({message: '⚠️ Достигнут лимит продлений. Купи VIP для безлимита!'});
+return;
+}
+videoExtensions++;
+tg.showPopup({message: `✅ Видео продлено! Всего: ${videoExtensions * 6} секунд`});
+}
+
+function addPromptToVideo(){
+tg.showPopup({message: '📝 Введи новый промт для следующего сегмента в поле выше.'});
 }
 
 function audioTab(){
@@ -302,7 +327,7 @@ h+=`<div class="lock-screen"><div class="lock-icon">🔒</div>
 <div class="lock-title">${lang==='ru'?'Доступ ограничен':'Access Restricted'}</div>
 <div class="lock-desc">${lang==='ru'?'Введи ключ разработчика':'Enter developer key'}</div>
 <input type="text" id="devKeyInput" placeholder="DEV-ключ..." style="text-align:center;margin-bottom:12px;">
-<button class="btn btn-gold btn-sm" style="width:100%;" onclick="checkDevKey()">🔓 ${lang==='ru'?'Разблокировать':'Unlock'}</button>
+<button class="btn btn-gold btn-sm" style="width:100%;" id="devUnlockBtn" onclick="checkDevKey()">🔓 ${lang==='ru'?'Разблокировать':'Unlock'}</button>
 <p style="font-size:10px;color:var(--text2);margin-top:10px;">${lang==='ru'?'Нет ключа? Напиши @Vlad_Svorob':'No key? Message @Vlad_Svorob'}</p></div></div>`;
 return h;
 }
@@ -311,21 +336,21 @@ h+=`<div class="stats-grid"><div class="stat-card"><div class="stat-value stat-a
 <button class="btn btn-red btn-sm" style="width:100%;margin-top:6px;" onclick="devMode=false;R();">🔒 Выйти</button></div>
 <div class="glass"><div class="section-title">📁 Файлы</div>`;
 files.forEach((f,i)=>{h+=`<div class="file-list-item"><div class="file-icon">${f.t==='html'?'📄':f.t==='python'?'🐍':'📝'}</div><div class="file-name">${f.n}</div><div class="file-size">${f.s}</div><div class="file-actions"><button class="btn btn-outline btn-sm" onclick="editFile(${i})">✏️</button></div></div>`;});
-h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v3.1 — Dev Lock Fixed</p></div>`;
+h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v3.2 — Dev Fixed + Extend</p></div>`;
 return h;
 }
 
 function checkDevKey(){
 const keyInput = document.getElementById('devKeyInput');
-if (!keyInput) return;
+if (!keyInput) { alert('Ошибка: поле ввода не найдено'); return; }
 const key = keyInput.value.trim();
-if (!key) { tg.showPopup({message: '❌ Введи ключ!'}); return; }
+if (!key) { alert('❌ Введи ключ!'); return; }
 if (DEV_KEYS.includes(key)) {
 devMode = true;
-tg.showPopup({message: '✅ Доступ разрешён!'});
-setTimeout(() => { R(); }, 300);
+alert('✅ Доступ разрешён!');
+R();
 } else {
-tg.showPopup({message: '❌ Неверный ключ'});
+alert('❌ Неверный ключ: ' + key);
 }
 }
 
@@ -335,7 +360,7 @@ m.innerHTML=`<div class="modal-content"><div class="section-title">✏️ ${f.n}
 }
 function saveFile(i){closeModal();tg.showPopup({message:'✅ Сохранено!'});}
 function closeModal(){document.getElementById('modal').style.display='none';}
-function selectTab(t){tab=t;document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));const el=document.querySelector(`.tab[onclick*="${t}"]`);if(el)el.classList.add('active');R();}
+function selectTab(t){tab=t;videoExtensions=0;document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));const el=document.querySelector(`.tab[onclick*="${t}"]`);if(el)el.classList.add('active');R();}
 function selectFmt(f){fmt=f;R();}
 function setLang(l){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');R();}
 function buyItem(i){tg.openTelegramLink('https://t.me/'+telegramUser);}
