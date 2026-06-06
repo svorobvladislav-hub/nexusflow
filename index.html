@@ -7,113 +7,498 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg: #000000; --card: rgba(255,255,255,0.05); --accent: #0A84FF;
-            --accent2: #5E5CE6; --gold: #FFD60A; --text: #FFFFFF;
-            --text2: rgba(255,255,255,0.6); --border: rgba(255,255,255,0.1);
-            --green: #30D158; --red: #FF453A; --orange: #FF9F0A;
-            --glass: rgba(255,255,255,0.08); --blur: blur(20px); --editor-bg: #1a1a2e;
+            --bg: #000000;
+            --card: rgba(255,255,255,0.05);
+            --accent: #0A84FF;
+            --accent2: #5E5CE6;
+            --gold: #FFD60A;
+            --text: #FFFFFF;
+            --text2: rgba(255,255,255,0.6);
+            --border: rgba(255,255,255,0.1);
+            --green: #30D158;
+            --red: #FF453A;
+            --orange: #FF9F0A;
+            --glass: rgba(255,255,255,0.08);
+            --blur: blur(20px);
+            --editor-bg: #1a1a2e;
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-            background: var(--bg); color: var(--text); min-height: 100vh; padding: 0;
-            overflow-x: hidden; -webkit-font-smoothing: antialiased;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
-        .glow { position:fixed; width:300px; height:300px; border-radius:50%; filter:blur(100px); opacity:0.3; pointer-events:none; z-index:0; }
-        .glow-1 { top:-100px; left:-100px; background:var(--accent); }
-        .glow-2 { bottom:-100px; right:-100px; background:var(--accent2); }
-        .container { position:relative; z-index:1; max-width:500px; margin:0 auto; padding:20px 16px 40px; }
-        .header { text-align:center; padding:30px 0 20px; }
-        .logo { width:80px; height:80px; margin:0 auto 16px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:22px; display:flex; align-items:center; justify-content:center; font-size:36px; box-shadow:0 8px 32px rgba(10,132,255,0.3); }
-        .header h1 { font-size:28px; font-weight:700; }
-        .subtitle { color:var(--text2); font-size:14px; margin-top:4px; }
-        .glass { background:var(--glass); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur); border:1px solid var(--border); border-radius:20px; padding:16px; margin-bottom:12px; animation:slideUp 0.3s ease; }
-        .profile-bar { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--glass); backdrop-filter:var(--blur); border:1px solid var(--border); border-radius:20px; margin-bottom:16px; }
-        .avatar { width:44px; height:44px; border-radius:16px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
-        .profile-info { flex:1; } .profile-name { font-weight:600; font-size:16px; } .profile-status { font-size:12px; color:var(--text2); }
-        .token-badge { background:linear-gradient(135deg,rgba(255,214,10,0.2),rgba(255,214,10,0.1)); border:1px solid rgba(255,214,10,0.3); padding:8px 14px; border-radius:30px; font-size:14px; font-weight:700; color:var(--gold); }
-        .tabs { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding:4px 0; scrollbar-width:none; }
-        .tabs::-webkit-scrollbar { display:none; }
-        .tab { flex-shrink:0; padding:10px 14px; border-radius:30px; border:1px solid var(--border); background:var(--glass); color:var(--text2); cursor:pointer; font-size:12px; font-weight:500; white-space:nowrap; transition:all 0.2s; }
-        .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
-        .tab.vip { border-color:rgba(255,214,10,0.4); color:var(--gold); } .tab.vip.active { background:var(--gold); border-color:var(--gold); color:#000; }
-        .tab.dev { border-color:rgba(255,69,58,0.4); color:var(--red); } .tab.dev.active { background:var(--red); border-color:var(--red); color:#fff; }
-        .section-title { font-size:13px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
-        select, input, textarea { width:100%; padding:14px 16px; border-radius:14px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); font-size:15px; outline:none; font-family:inherit; -webkit-appearance:none; }
-        textarea { min-height:80px; resize:vertical; }
-        .btn { width:100%; padding:16px; border-radius:16px; border:none; font-size:16px; font-weight:600; cursor:pointer; color:#fff; transition:all 0.2s; }
-        .btn-primary { background:linear-gradient(135deg,var(--accent),#0077ED); }
-        .btn-gold { background:linear-gradient(135deg,#FFD60A,#FFC700); color:#000; }
-        .btn-red { background:linear-gradient(135deg,var(--red),#dc2626); }
-        .btn-outline { background:transparent; border:1px solid var(--accent); color:var(--accent); }
-        .btn:active { transform:scale(0.97); }
-        .btn-sm { width:auto; padding:10px 16px; font-size:13px; border-radius:12px; }
-        .btn-xs { width:auto; padding:8px 12px; font-size:11px; border-radius:8px; }
-        .btn-row { display:flex; gap:8px; } .btn-row .btn { flex:1; }
-        .badge { display:inline-block; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:700; }
-        .badge-vip { background:var(--gold); color:#000; } .badge-dev { background:var(--red); color:#fff; } .badge-free { background:var(--glass); color:var(--text2); }
-        .model-list { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-        .model-item { padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--glass); font-size:11px; cursor:pointer; text-align:center; }
-        .dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:4px; }
-        .dot-green { background:var(--green); } .dot-yellow { background:var(--orange); } .dot-red { background:var(--red); }
-        .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-        .stat-card { background:var(--glass); border:1px solid var(--border); border-radius:16px; padding:16px; text-align:center; }
-        .stat-value { font-size:28px; font-weight:700; } .stat-accent { color:var(--accent); } .stat-gold { color:var(--gold); }
-        .stat-label { font-size:11px; color:var(--text2); margin-top:2px; }
-        .ref-link { background:var(--glass); border:1px dashed rgba(10,132,255,0.4); border-radius:14px; padding:14px; text-align:center; font-size:12px; color:var(--accent); word-break:break-all; margin:8px 0; user-select:all; }
-        .chat-box { background:var(--glass); border:1px solid var(--border); border-radius:16px; padding:12px; max-height:250px; overflow-y:auto; margin-bottom:8px; }
-        .chat-msg { padding:10px 14px; border-radius:14px; margin:6px 0; font-size:13px; max-width:85%; }
-        .chat-msg.user { background:var(--accent); margin-left:auto; } .chat-msg.bot { background:var(--glass); margin-right:auto; }
-        .lang-switch { display:flex; justify-content:center; gap:6px; margin-bottom:16px; }
-        .lang-btn { padding:8px 16px; border-radius:30px; border:1px solid var(--border); background:var(--glass); color:var(--text2); cursor:pointer; font-size:12px; font-weight:500; }
-        .lang-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-        .progress-track { height:4px; border-radius:2px; background:var(--border); overflow:hidden; margin:8px 0; }
-        .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:2px; transition:width 0.5s; }
-        .price-table { width:100%; border-collapse:collapse; margin:8px 0; }
-        .price-table th, .price-table td { padding:10px 8px; text-align:left; font-size:12px; border-bottom:1px solid var(--border); }
-        .card-info { background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:14px; padding:14px; text-align:center; font-size:18px; letter-spacing:2px; font-weight:600; margin:8px 0; user-select:all; }
-        .copy-btn { background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:10px; cursor:pointer; font-size:12px; width:100%; }
-        .help-box { background:rgba(10,132,255,0.1); border:1px solid rgba(10,132,255,0.2); border-radius:12px; padding:12px; margin-top:8px; font-size:12px; color:var(--accent); }
-        .lock-screen { text-align:center; padding:30px 20px; }
-        .lock-screen .lock-icon { font-size:60px; margin-bottom:16px; }
-        .lock-screen .lock-title { font-size:18px; font-weight:700; margin-bottom:8px; }
-        .lock-screen .lock-desc { font-size:13px; color:var(--text2); margin-bottom:20px; }
-        .lock-screen .lock-error { font-size:11px; color:var(--red); margin-top:6px; min-height:16px; }
-        .file-list-item { display:flex; align-items:center; gap:8px; padding:10px; border-bottom:1px solid var(--border); }
-        .file-list-item .file-icon { font-size:18px; } .file-list-item .file-name { flex:1; font-size:13px; } .file-list-item .file-size { font-size:10px; color:var(--text2); }
-        .modal { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:100; display:flex; align-items:center; justify-content:center; }
-        .modal-content { background:var(--bg); border:1px solid var(--border); border-radius:20px; padding:20px; width:90%; max-width:500px; max-height:80vh; overflow-y:auto; }
-        .editor-toolbar { display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap; }
-        .editor-toolbar button { padding:6px 10px; border-radius:8px; border:1px solid var(--border); background:var(--glass); color:var(--text2); cursor:pointer; font-size:10px; }
-        .code-editor { background:var(--editor-bg); border:1px solid var(--border); border-radius:12px; padding:12px; font-family:'SF Mono',monospace; font-size:11px; line-height:1.6; color:#e2e8f0; min-height:200px; resize:vertical; overflow:auto; }
+
+        .glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .glow-1 { top: -100px; left: -100px; background: var(--accent); }
+        .glow-2 { bottom: -100px; right: -100px; background: var(--accent2); }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0 20px;
+        }
+        .header .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 8px 32px rgba(10, 132, 255, 0.3);
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .header .subtitle {
+            color: var(--text2);
+            font-size: 14px;
+            margin-top: 4px;
+            letter-spacing: 0.2px;
+        }
+
+        .glass {
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+        .glass:active {
+            transform: scale(0.98);
+        }
+
+        .profile-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .profile-info { flex: 1; min-width: 0; }
+        .profile-name { font-weight: 600; font-size: 16px; letter-spacing: -0.3px; }
+        .profile-status { font-size: 12px; color: var(--text2); }
+        .token-badge {
+            background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.1));
+            border: 1px solid rgba(255, 214, 10, 0.3);
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gold);
+            flex-shrink: 0;
+            backdrop-filter: var(--blur);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding: 4px 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+
+        .tab {
+            flex-shrink: 0;
+            padding: 10px 14px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            color: var(--text2);
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            letter-spacing: -0.2px;
+        }
+        .tab.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+        }
+        .tab.vip {
+            border-color: rgba(255, 214, 10, 0.4);
+            color: var(--gold);
+        }
+        .tab.vip.active {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: #000;
+            box-shadow: 0 4px 12px rgba(255, 214, 10, 0.3);
+        }
+        .tab.dev {
+            border-color: rgba(255, 69, 58, 0.4);
+            color: var(--red);
+        }
+        .tab.dev.active {
+            background: var(--red);
+            border-color: var(--red);
+            color: #fff;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            font-size: 15px;
+            outline: none;
+            font-family: inherit;
+            letter-spacing: -0.2px;
+            -webkit-appearance: none;
+        }
+        textarea { min-height: 80px; resize: vertical; }
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.15);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #fff;
+            letter-spacing: -0.3px;
+            transition: all 0.2s ease;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--accent), #0077ED); box-shadow: 0 4px 16px rgba(10, 132, 255, 0.3); }
+        .btn-gold { background: linear-gradient(135deg, #FFD60A, #FFC700); color: #000; box-shadow: 0 4px 16px rgba(255, 214, 10, 0.3); }
+        .btn-red { background: linear-gradient(135deg, var(--red), #dc2626); }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.4; }
+
+        .btn-sm { width: auto; padding: 10px 16px; font-size: 13px; border-radius: 12px; }
+        .btn-xs { width: auto; padding: 8px 12px; font-size: 11px; border-radius: 8px; }
+        .btn-row { display: flex; gap: 8px; }
+        .btn-row .btn { flex: 1; }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .badge-vip { background: var(--gold); color: #000; }
+        .badge-dev { background: var(--red); color: #fff; }
+        .badge-free { background: var(--glass); color: var(--text2); }
+
+        .model-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .model-item {
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .model-item.selected { border-color: var(--accent); background: rgba(10, 132, 255, 0.15); }
+        .model-item .model-name { font-weight: 600; margin-top: 2px; }
+        .model-item .model-dur { font-size: 10px; color: var(--text2); }
+
+        .dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        .dot-green { background: var(--green); box-shadow: 0 0 6px rgba(48, 209, 88, 0.5); }
+        .dot-yellow { background: var(--orange); box-shadow: 0 0 6px rgba(255, 159, 10, 0.5); }
+        .dot-red { background: var(--red); box-shadow: 0 0 6px rgba(255, 69, 58, 0.5); }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .stat-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-value { font-size: 28px; font-weight: 700; letter-spacing: -1px; }
+        .stat-value.accent { color: var(--accent); }
+        .stat-value.gold { color: var(--gold); }
+        .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+        .ref-link {
+            background: var(--glass);
+            border: 1px dashed rgba(10, 132, 255, 0.4);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--accent);
+            word-break: break-all;
+            margin: 8px 0;
+            user-select: all;
+        }
+
+        .chat-box {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 8px;
+        }
+        .chat-msg {
+            padding: 10px 14px;
+            border-radius: 14px;
+            margin: 6px 0;
+            font-size: 13px;
+            max-width: 85%;
+            letter-spacing: -0.2px;
+            line-height: 1.4;
+        }
+        .chat-msg.user {
+            background: var(--accent);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-msg.bot {
+            background: var(--glass);
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        .lang-switch { display: flex; justify-content: center; gap: 6px; margin-bottom: 16px; }
+        .lang-btn {
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+            color: var(--text2);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .lang-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .progress-track {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border);
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        .price-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+        .price-table th, .price-table td {
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .price-table th { color: var(--text2); font-weight: 500; }
+
+        .card-info {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+            font-size: 18px;
+            letter-spacing: 2px;
+            font-weight: 600;
+            margin: 8px 0;
+            user-select: all;
+        }
+
+        .copy-btn { background: var(--accent); color: #fff; border: none; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 12px; width: 100%; }
+
+        .help-box {
+            background: rgba(10, 132, 255, 0.1);
+            border: 1px solid rgba(10, 132, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        .lock-screen { text-align: center; padding: 30px 20px; }
+        .lock-screen .lock-icon { font-size: 60px; margin-bottom: 16px; }
+        .lock-screen .lock-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .lock-screen .lock-desc { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+        .lock-screen .lock-error { font-size: 11px; color: var(--red); margin-top: 6px; min-height: 16px; }
+
+        .file-list-item { display: flex; align-items: center; gap: 8px; padding: 10px; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .file-list-item:hover { background: var(--glass); }
+        .file-list-item .file-icon { font-size: 18px; }
+        .file-list-item .file-name { flex: 1; font-size: 13px; }
+        .file-list-item .file-size { font-size: 10px; color: var(--text2); }
+        .file-list-item .file-actions { display: flex; gap: 4px; }
+        .file-list-item .file-actions button { padding: 4px 8px; border-radius: 6px; border: none; cursor: pointer; font-size: 10px; }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .editor-toolbar { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
+        .editor-toolbar button {
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--glass);
+            color: var(--text2);
+            cursor: pointer;
+            font-size: 10px;
+        }
+        .editor-toolbar button:hover { background: var(--accent); color: #fff; }
+
+        .code-editor {
+            background: var(--editor-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            font-family: 'SF Mono', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            color: #e2e8f0;
+            min-height: 200px;
+            resize: vertical;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .code-editor:focus { outline: none; border-color: var(--accent); }
+
         .generate-btn-container { padding: 0 0 20px 0; }
-        .extend-bar { display:flex; gap:6px; align-items:center; margin-top:8px; }
-        .extend-bar .extend-count { background:var(--glass); padding:6px 12px; border-radius:20px; font-size:12px; color:var(--text2); }
-        @keyframes slideUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-        .generating { animation:pulse 1.5s infinite; }
+
+        .extend-bar { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+        .extend-bar .extend-count { background: var(--glass); padding: 6px 12px; border-radius: 20px; font-size: 12px; color: var(--text2); }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .generating { animation: pulse 1.5s infinite; }
     </style>
 </head>
 <body>
-<div class="glow glow-1"></div><div class="glow glow-2"></div>
+
+<div class="glow glow-1"></div>
+<div class="glow glow-2"></div>
+
 <div class="container">
     <div class="lang-switch">
-        <button class="lang-btn active" onclick="setLang('ru')">🇷🇺 RU</button>
-        <button class="lang-btn" onclick="setLang('en')">🇺🇸 EN</button>
+        <button class="lang-btn active" onclick="setLang('ru')">🇷🇺 Русский</button>
+        <button class="lang-btn" onclick="setLang('en')">🇺🇸 English</button>
     </div>
+
     <div class="header">
         <div class="logo">🎬</div>
         <h1>NexusFlow</h1>
-        <p class="subtitle">AI Video Pipeline · v3.3</p>
+        <p class="subtitle">AI Video Pipeline · v3.4 Final</p>
     </div>
+
     <div class="profile-bar">
         <div class="avatar">👤</div>
         <div class="profile-info">
-            <div class="profile-name">User</div>
+            <div class="profile-name">Пользователь</div>
             <div class="profile-status"><span class="badge badge-free">FREE</span></div>
         </div>
         <div class="token-badge">🪙 0</div>
     </div>
+
     <div class="tabs" id="tabs">
         <button class="tab active" onclick="selectTab('youtube')">🎥 YT</button>
         <button class="tab vip" onclick="selectTab('photo')">🖼️ Фото</button>
@@ -125,223 +510,321 @@
         <button class="tab" onclick="selectTab('support')">💬</button>
         <button class="tab dev" onclick="selectTab('dev')">🛠️</button>
     </div>
+
     <div id="content"></div>
+
     <div class="generate-btn-container" id="generateBtnContainer" style="display:none;">
         <button class="btn btn-primary" onclick="generate()">✨ Сгенерировать</button>
     </div>
-    <div id="progress" style="display:none;margin-top:12px;">
+
+    <div id="progress" style="display:none; margin-top:12px;">
         <div class="glass">
             <div class="generating" id="progressLabel">Подготовка...</div>
-            <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0;"></div></div>
+            <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%;"></div></div>
         </div>
     </div>
 </div>
+
 <div id="modal" class="modal" style="display:none;"></div>
 
 <script>
-const tg=window.Telegram.WebApp;tg.expand();tg.ready();
-let lang='ru',tab='youtube',fmt='b',currentVoice='auto',devMode=false;
-let videoExtensions=0, maxExtensions=5;
+const tg = window.Telegram.WebApp;
+tg.expand();
+tg.ready();
 
-const cardNumber='2204321238722',phoneNumber='+79095159079',bankName='Ozon Bank',telegramUser='Vlad_Svorob';
-const DEV_KEYS=['NEXUS-DEV-001','nexus-dev-2024','nxdev'];
+let currentLang = 'ru';
+let currentTab = 'youtube';
+let selectedFormat = 'b';
+let currentVoice = 'auto';
+let devMode = false;
+let videoExtensions = 0;
+const maxExtensions = 5;
 
-const categories=[
-{n:'drift',ru:'🏎️ Дрифт',en:'🏎️ Drift',music:'phonk',voice:'none'},
-{n:'race',ru:'🏁 Гонки',en:'🏁 Race',music:'phonk',voice:'none'},
-{n:'build',ru:'🔧 Сборка',en:'🔧 Build',music:'none',voice:'gtts'},
-{n:'parking',ru:'🅿️ Парковка',en:'🅿️ Parking',music:'none',voice:'gtts'},
-{n:'gaming',ru:'🎮 Игры',en:'🎮 Gaming',music:'energetic',voice:'gtts'},
-{n:'tech',ru:'📱 Техника',en:'📱 Tech',music:'calm',voice:'gtts'},
-{n:'cooking',ru:'🍳 Готовка',en:'🍳 Cooking',music:'lofi',voice:'gtts'},
-{n:'sports',ru:'🏀 Спорт',en:'🏀 Sports',music:'epic',voice:'gtts'},
-{n:'travel',ru:'🌍 Блоги',en:'🌍 Travel',music:'calm',voice:'gtts'},
-{n:'animals',ru:'🐱 Животные',en:'🐱 Animals',music:'happy',voice:'gtts'},
-{n:'education',ru:'📚 Обучение',en:'📚 Education',music:'none',voice:'gtts'},
-{n:'diy',ru:'🏠 DIY',en:'🏠 DIY',music:'none',voice:'gtts'}
+const cardNumber = '2204321238722';
+const phoneNumber = '+79095159079';
+const bankName = 'Ozon Bank';
+const telegramUser = 'Vlad_Svorob';
+const DEV_KEYS = ['NEXUS-DEV-001', 'nexus-dev-2024', 'nxdev'];
+
+const categories = [
+    { n: 'drift', ru: '🏎️ Дрифт', en: '🏎️ Drift', music: 'phonk', voice: 'none' },
+    { n: 'race', ru: '🏁 Гонки', en: '🏁 Race', music: 'phonk', voice: 'none' },
+    { n: 'build', ru: '🔧 Сборка', en: '🔧 Build', music: 'none', voice: 'gtts' },
+    { n: 'parking', ru: '🅿️ Парковка', en: '🅿️ Parking', music: 'none', voice: 'gtts' },
+    { n: 'gaming', ru: '🎮 Игры', en: '🎮 Gaming', music: 'energetic', voice: 'gtts' },
+    { n: 'tech', ru: '📱 Техника', en: '📱 Tech', music: 'calm', voice: 'gtts' },
+    { n: 'cooking', ru: '🍳 Готовка', en: '🍳 Cooking', music: 'lofi', voice: 'gtts' },
+    { n: 'sports', ru: '🏀 Спорт', en: '🏀 Sports', music: 'epic', voice: 'gtts' },
+    { n: 'travel', ru: '🌍 Блоги', en: '🌍 Travel', music: 'calm', voice: 'gtts' },
+    { n: 'animals', ru: '🐱 Животные', en: '🐱 Animals', music: 'happy', voice: 'gtts' },
+    { n: 'education', ru: '📚 Обучение', en: '📚 Education', music: 'none', voice: 'gtts' },
+    { n: 'diy', ru: '🏠 DIY', en: '🏠 DIY', music: 'none', voice: 'gtts' }
 ];
 
-const voices=[
-{n:'auto',ru:'🤖 Авто (по языку)',en:'🤖 Auto'},
-{n:'male_us',ru:'👨 🇺🇸 Мужской (США)',en:'👨 🇺🇸 Male (US)'},
-{n:'female_us',ru:'👩 🇺🇸 Женский (США)',en:'👩 🇺🇸 Female (US)'},
-{n:'male_uk',ru:'👨 🇬🇧 Британский',en:'👨 🇬🇧 British'},
-{n:'female_uk',ru:'👩 🇬🇧 Британская',en:'👩 🇬🇧 British'},
-{n:'male_ru',ru:'👨 🇷🇺 Русский мужской',en:'👨 🇷🇺 Russian Male'},
-{n:'female_ru',ru:'👩 🇷🇺 Русский женский',en:'👩 🇷🇺 Russian Female'},
-{n:'male_de',ru:'👨 🇩🇪 Немецкий',en:'👨 🇩🇪 German'},
-{n:'female_es',ru:'👩 🇪🇸 Испанский',en:'👩 🇪🇸 Spanish'}
+const voices = [
+    { n: 'auto', ru: '🤖 Авто (по языку)', en: '🤖 Auto' },
+    { n: 'male_us', ru: '👨 🇺🇸 Мужской (США)', en: '👨 🇺🇸 Male (US)' },
+    { n: 'female_us', ru: '👩 🇺🇸 Женский (США)', en: '👩 🇺🇸 Female (US)' },
+    { n: 'male_uk', ru: '👨 🇬🇧 Британский', en: '👨 🇬🇧 British' },
+    { n: 'female_uk', ru: '👩 🇬🇧 Британская', en: '👩 🇬🇧 British' },
+    { n: 'male_ru', ru: '👨 🇷🇺 Русский мужской', en: '👨 🇷🇺 Russian Male' },
+    { n: 'female_ru', ru: '👩 🇷🇺 Русский женский', en: '👩 🇷🇺 Russian Female' },
+    { n: 'male_de', ru: '👨 🇩🇪 Немецкий', en: '👨 🇩🇪 German' },
+    { n: 'female_es', ru: '👩 🇪🇸 Испанский', en: '👩 🇪🇸 Spanish' }
 ];
 
-const models={
-photo:[{n:'Gemini',s:'green'},{n:'Flux',s:'green'},{n:'Stable Diffusion',s:'green'},{n:'SDXL',s:'green'},{n:'Copilot',s:'yellow'},{n:'ChatGPT',s:'yellow'},{n:'Midjourney',s:'red'},{n:'Leonardo AI',s:'yellow'}],
-video:[{n:'YouTube+CLIP',s:'green',d:'5-15мин'},{n:'CogVideoX',s:'green',d:'6с'},{n:'EasyAnimate',s:'green',d:'16с'},{n:'SVD',s:'green',d:'4с'},{n:'Zeroscope',s:'yellow',d:'3с'},{n:'Modelscope',s:'yellow',d:'3с'},{n:'I2VGen-XL',s:'yellow',d:'5с'},{n:'Pika Labs',s:'red',d:'3с'},{n:'RunwayML',s:'red',d:'4с'}],
-audio:[{n:'Google TTS',s:'green'},{n:'Edge TTS',s:'green'},{n:'gTTS',s:'green'},{n:'ElevenLabs',s:'red'}]
+const models = {
+    photo: [
+        { n: 'Gemini', s: 'green' }, { n: 'Flux', s: 'green' }, { n: 'Stable Diffusion', s: 'green' }, { n: 'SDXL', s: 'green' },
+        { n: 'Copilot', s: 'yellow' }, { n: 'ChatGPT', s: 'yellow' }, { n: 'Midjourney', s: 'red' }, { n: 'Leonardo AI', s: 'yellow' }
+    ],
+    video: [
+        { n: 'YouTube+CLIP', s: 'green', d: '5-15 мин' }, { n: 'CogVideoX', s: 'green', d: '6 сек' }, { n: 'EasyAnimate', s: 'green', d: '16 сек' },
+        { n: 'SVD', s: 'green', d: '4 сек' }, { n: 'Zeroscope', s: 'yellow', d: '3 сек' }, { n: 'Modelscope', s: 'yellow', d: '3 сек' },
+        { n: 'I2VGen-XL', s: 'yellow', d: '5 сек' }, { n: 'Pika Labs', s: 'red', d: '3 сек' }, { n: 'RunwayML', s: 'red', d: '4 сек' }
+    ],
+    audio: [
+        { n: 'Google TTS', s: 'green' }, { n: 'Edge TTS', s: 'green' }, { n: 'gTTS', s: 'green' }, { n: 'ElevenLabs', s: 'red' }
+    ]
 };
 
-const files=[{n:'index.html',s:'21 KB',t:'html'},{n:'bot.py',s:'8 KB',t:'python'},{n:'requirements.txt',s:'0.3 KB',t:'text'},{n:'Dockerfile',s:'0.4 KB',t:'docker'}];
+const files = [
+    { n: 'index.html', s: '24 KB', t: 'html' }, { n: 'bot.py', s: '8 KB', t: 'python' },
+    { n: 'requirements.txt', s: '0.3 KB', t: 'text' }, { n: 'Dockerfile', s: '0.4 KB', t: 'docker' }
+];
 
-const prices={
-vip:[{d:'1 месяц',r:500,u:5},{d:'2 месяца',r:900,u:9},{d:'3 месяца',r:1200,u:12},{d:'6 месяцев',r:2000,u:20},{d:'Навсегда',r:3500,u:35}],
-tokens:[{t:50,r:300,u:3},{t:150,r:800,u:8},{t:500,r:2000,u:20},{t:1000,r:3500,u:35}]
+const prices = {
+    vip: [
+        { d: '1 месяц', r: 500, u: 5 }, { d: '2 месяца', r: 900, u: 9 }, { d: '3 месяца', r: 1200, u: 12 },
+        { d: '6 месяцев', r: 2000, u: 20 }, { d: 'Навсегда', r: 3500, u: 35 }
+    ],
+    tokens: [
+        { t: 50, r: 300, u: 3 }, { t: 150, r: 800, u: 8 }, { t: 500, r: 2000, u: 20 }, { t: 1000, r: 3500, u: 35 }
+    ]
 };
 
 const knowledgeBase = {
-ru: {'привет':'👋 Привет! Я AI-помощник NexusFlow.','как создать':'📹 **YouTube:**\n1. 🎥 YT\n2. Категория\n3. Тема\n4. Голос\n5. Формат\n6. "Сгенерировать"','vip':'💎 **VIP:**\n1. Оплата на карту\n2. Напиши @Vlad_Svorob\n3. Получи ключ','default':'Я помогу с видео, VIP, токенами. Спроси! 😊'},
-en: {'hello':'👋 Hi! I am NexusFlow AI assistant.','video':'📹 **YouTube:**\n1. 🎥 YT tab\n2. Category\n3. Topic\n4. Voice\n5. Format\n6. "Generate"','default':'I can help with videos, VIP, tokens. Ask me! 😊'}
+    ru: {
+        'привет': '👋 Привет! Я AI-помощник NexusFlow. Спроси о видео, VIP, моделях!',
+        'как создать': '📹 **YouTube:**\n1. Вкладка 🎥 YT\n2. Категория\n3. Тема\n4. Голос\n5. Формат\n6. "Сгенерировать"',
+        'vip': '💎 **VIP:**\n1. Оплата на карту 2204321238722\n2. Напиши @Vlad_Svorob\n3. Получи ключ',
+        'цена': '💰 VIP: 500₽/мес, 3500₽ навсегда\n🪙 Токены: 50=300₽',
+        'default': 'Я помогу с видео, VIP, токенами. Спроси! 😊'
+    },
+    en: {
+        'hello': '👋 Hi! I am NexusFlow AI assistant.',
+        'video': '📹 **YouTube:**\n1. 🎥 YT tab\n2. Category\n3. Topic\n4. Voice\n5. Format\n6. "Generate"',
+        'default': 'I can help with videos, VIP, tokens. Ask me! 😊'
+    }
 };
 
-function findBestAnswer(q){const kb=knowledgeBase[lang]||knowledgeBase['ru'];for(const[k,v]of Object.entries(kb)){if(q.toLowerCase().includes(k))return v;}return kb['default'];}
-const genTabs=['youtube','photo','audio','video'];
-
-function R(){render();}
-function render(){
-let c=document.getElementById('content'),h='';
-if(tab==='youtube')h=youtubeTab();
-if(tab==='photo')h=photoTab();
-if(tab==='audio')h=audioTab();
-if(tab==='video')h=videoTab();
-if(tab==='buy')h=buyTab();
-if(tab==='ref')h=refTab();
-if(tab==='learn')h=learnTab();
-if(tab==='support')h=supportTab();
-if(tab==='dev')h=devTab();
-c.innerHTML=h;
-document.getElementById('generateBtnContainer').style.display=genTabs.includes(tab)?'block':'none';
-document.getElementById('progress').style.display='none';
-// Вешаем обработчик на кнопку разблокировки после рендера
-setTimeout(()=>{
-const btn=document.getElementById('devUnlockBtn');
-if(btn){btn.onclick=function(){
-const keyInput=document.getElementById('devKeyInput');
-const errEl=document.getElementById('devError');
-if(!keyInput)return;
-const key=keyInput.value.trim();
-if(!key){if(errEl)errEl.textContent=lang==='ru'?'❌ Введи ключ!':'❌ Enter key!';return;}
-if(DEV_KEYS.includes(key)){devMode=true;if(errEl)errEl.textContent='';R();}
-else{if(errEl)errEl.textContent=lang==='ru'?'❌ Неверный ключ':'❌ Invalid key';keyInput.value='';}
-};}
-},100);
+function findBestAnswer(q) {
+    const kb = knowledgeBase[currentLang] || knowledgeBase['ru'];
+    for (const [key, val] of Object.entries(kb)) {
+        if (q.toLowerCase().includes(key)) return val;
+    }
+    return kb['default'];
 }
 
-function catName(c){return c[lang]||c['en'];}
-function vName(v){return v[lang]||v['en'];}
+const genTabs = ['youtube', 'photo', 'audio', 'video'];
 
-function youtubeTab(){
-let h=`<div class="glass"><div class="section-title">📂 Категория</div><select id="ycat" onchange="updateCatHelp()">`;
-categories.forEach(c=>{h+=`<option value="${c.n}">${catName(c)}</option>`;});
-h+=`</select><div class="help-box" id="catHelp">💡 ${lang==='ru'?'Выбери категорию':'Choose category'}</div></div>`;
-h+=`<div class="glass"><div class="section-title">📋 Тема</div><input type="text" placeholder="${lang==='ru'?'Опиши тему...':'Describe topic...'}"></div>`;
-h+=`<div class="glass"><div class="section-title">🎤 Голос</div><select id="voice" onchange="currentVoice=this.value">`;
-voices.forEach(v=>{h+=`<option value="${v.n}" ${v.n===currentVoice?'selected':''}>${vName(v)}</option>`;});
-h+=`</select></div>`;
-h+=`<div class="glass"><div class="section-title">📹 Формат</div><div class="btn-row"><button class="btn btn-sm ${fmt==='h'?'btn-primary':'btn-outline'}" onclick="selectFmt('h')">📹 Гор</button><button class="btn btn-sm ${fmt==='s'?'btn-primary':'btn-outline'}" onclick="selectFmt('s')">📱 Верт</button><button class="btn btn-sm ${fmt==='b'?'btn-primary':'btn-outline'}" onclick="selectFmt('b')">🔄 Оба</button></div></div>`;
-return h;
+function R() { render(); }
+function render() {
+    let c = document.getElementById('content'), h = '';
+    if (currentTab === 'youtube') h = youtubeTab();
+    if (currentTab === 'photo') h = photoTab();
+    if (currentTab === 'audio') h = audioTab();
+    if (currentTab === 'video') h = videoTab();
+    if (currentTab === 'buy') h = buyTab();
+    if (currentTab === 'ref') h = refTab();
+    if (currentTab === 'learn') h = learnTab();
+    if (currentTab === 'support') h = supportTab();
+    if (currentTab === 'dev') h = devTab();
+    c.innerHTML = h;
+
+    document.getElementById('generateBtnContainer').style.display = genTabs.includes(currentTab) ? 'block' : 'none';
+    document.getElementById('progress').style.display = 'none';
+
+    // Вешаем обработчик на кнопку Dev-разблокировки
+    const unlockBtn = document.getElementById('devUnlockBtn');
+    if (unlockBtn) {
+        unlockBtn.onclick = function() {
+            const keyInput = document.getElementById('devKeyInput');
+            const errEl = document.getElementById('devError');
+            if (!keyInput) return;
+            const key = keyInput.value.trim();
+            if (!key) {
+                if (errEl) errEl.textContent = currentLang === 'ru' ? '❌ Введи ключ!' : '❌ Enter key!';
+                return;
+            }
+            if (DEV_KEYS.includes(key)) {
+                devMode = true;
+                if (errEl) errEl.textContent = '';
+                R();
+            } else {
+                if (errEl) errEl.textContent = currentLang === 'ru' ? '❌ Неверный ключ' : '❌ Invalid key';
+                keyInput.value = '';
+            }
+        };
+    }
 }
 
-function photoTab(){
-return`<div class="glass"><div class="section-title">🖼️ Промт <span class="badge badge-vip">VIP/🪙5</span></div><textarea placeholder="${lang==='ru'?'Опиши что сгенерировать...':'Describe...'}"></textarea></div>
-<div class="glass"><div class="section-title">🤖 Модель (${models.photo.length})</div><div class="model-list">${models.photo.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
+function catName(c) { return c[currentLang] || c['en']; }
+function vName(v) { return v[currentLang] || v['en']; }
+
+function youtubeTab() {
+    let h = `<div class="glass"><div class="section-title">📂 Категория</div><select id="ycat" onchange="updateCatHelp()">`;
+    categories.forEach(c => { h += `<option value="${c.n}">${catName(c)}</option>`; });
+    h += `</select><div class="help-box" id="catHelp">💡 ${currentLang === 'ru' ? 'Выбери категорию для видео' : 'Choose a category'}</div></div>`;
+    h += `<div class="glass"><div class="section-title">📋 Тема</div><input type="text" placeholder="${currentLang === 'ru' ? 'Опиши тему видео...' : 'Describe your video topic...'}"></div>`;
+    h += `<div class="glass"><div class="section-title">🎤 Голос озвучки</div><select id="voice" onchange="currentVoice=this.value">`;
+    voices.forEach(v => { h += `<option value="${v.n}" ${v.n === currentVoice ? 'selected' : ''}>${vName(v)}</option>`; });
+    h += `</select></div>`;
+    h += `<div class="glass"><div class="section-title">📹 Формат</div><div class="btn-row"><button class="btn btn-sm ${selectedFormat === 'h' ? 'btn-primary' : 'btn-outline'}" onclick="selectFmt('h')">📹 Гор</button><button class="btn btn-sm ${selectedFormat === 's' ? 'btn-primary' : 'btn-outline'}" onclick="selectFmt('s')">📱 Верт</button><button class="btn btn-sm ${selectedFormat === 'b' ? 'btn-primary' : 'btn-outline'}" onclick="selectFmt('b')">🔄 Оба</button></div></div>`;
+    return h;
 }
 
-function videoTab(){
-let h=`<div class="glass"><div class="section-title">🎬 Промт или фото <span class="badge badge-vip">VIP/🪙10</span></div><textarea placeholder="${lang==='ru'?'Опиши видео...':'Describe video...'}"></textarea>
-<button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px;">📁 Загрузить фото</button></div>
-<div class="glass"><div class="section-title">🤖 Модель (${models.video.length})</div><div class="model-list">${models.video.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.d||''} · ${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
-h+=`<div class="glass"><div class="section-title">⏱️ Продление видео</div>
-<div class="extend-bar">
-<span class="extend-count">📹 ${videoExtensions*6}с / ${maxExtensions*6}с</span>
-<button class="btn btn-outline btn-xs" onclick="extendVideo()" style="flex:1;">🔄 Продлить +6с</button>
-<button class="btn btn-outline btn-xs" onclick="addPromptToVideo()" style="flex:1;">📝 Добавить промт</button>
-</div>
-<p style="font-size:10px;color:var(--text2);margin-top:6px;">Бесплатно: 5 продлений | VIP: безлимит</p></div>`;
-return h;
+function photoTab() {
+    return `<div class="glass"><div class="section-title">🖼️ Промт <span class="badge badge-vip">VIP/🪙5</span></div><textarea placeholder="${currentLang === 'ru' ? 'Опиши что сгенерировать...' : 'Describe what to generate...'}"></textarea></div>
+    <div class="glass"><div class="section-title">🤖 Модель (${models.photo.length})</div><div class="model-list">${models.photo.map(m => `<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.s === 'red' ? '🔜 Скоро' : '✅'}</small></div>`).join('')}</div></div>`;
 }
 
-function extendVideo(){
-if(videoExtensions>=maxExtensions){tg.showPopup({message:'⚠️ Лимит продлений. VIP — безлимит!'});return;}
-videoExtensions++;tg.showPopup({message:`✅ Продлено! Всего: ${videoExtensions*6}с`});}
-function addPromptToVideo(){tg.showPopup({message:'📝 Введи новый промт в поле выше.'});}
-
-function audioTab(){
-return`<div class="glass"><div class="section-title">🎤 Текст <span class="badge badge-vip">VIP/🪙3</span></div><textarea placeholder="${lang==='ru'?'Введи текст...':'Enter text...'}"></textarea></div>
-<div class="glass"><div class="section-title">🗣️ Голос</div><select>${voices.map(v=>`<option value="${v.n}">${vName(v)}</option>`).join('')}</select></div>
-<div class="glass"><div class="section-title">🤖 Модель (${models.audio.length})</div><div class="model-list">${models.audio.map(m=>`<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
+function videoTab() {
+    let h = `<div class="glass"><div class="section-title">🎬 Промт или фото <span class="badge badge-vip">VIP/🪙10</span></div><textarea placeholder="${currentLang === 'ru' ? 'Опиши видео...' : 'Describe video...'}"></textarea>
+    <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px;">📁 Загрузить фото</button></div>
+    <div class="glass"><div class="section-title">🤖 Модель (${models.video.length})</div><div class="model-list">${models.video.map(m => `<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.d || ''} · ${m.s === 'red' ? '🔜' : '✅'}</small></div>`).join('')}</div></div>`;
+    h += `<div class="glass"><div class="section-title">⏱️ Продление видео</div>
+    <div class="extend-bar">
+    <span class="extend-count">📹 ${videoExtensions * 6}с / ${maxExtensions * 6}с</span>
+    <button class="btn btn-outline btn-xs" onclick="extendVideo()" style="flex:1;">🔄 Продлить +6с</button>
+    <button class="btn btn-outline btn-xs" onclick="addPromptToVideo()" style="flex:1;">📝 Добавить промт</button>
+    </div>
+    <p style="font-size:10px;color:var(--text2);margin-top:6px;">Бесплатно: 5 продлений | VIP: безлимит</p></div>`;
+    return h;
 }
 
-function buyTab(){
-let h=`<div class="glass"><div class="section-title">💎 VIP Подписка</div><table class="price-table"><tr><th>Срок</th><th>₽</th><th>$</th><th></th></tr>`;
-prices.vip.forEach(p=>{h+=`<tr><td>${p.d}</td><td>${p.r}₽</td><td>$${p.u}</td><td><button class="btn btn-sm btn-primary" onclick="buyItem('${p.d}')">Купить</button></td></tr>`;});
-h+=`</table></div>`;
-h+=`<div class="glass"><div class="section-title">🪙 Токены</div><table class="price-table"><tr><th>Токены</th><th>₽</th><th>$</th><th></th></tr>`;
-prices.tokens.forEach(p=>{h+=`<tr><td>${p.t} 🪙</td><td>${p.r}₽</td><td>$${p.u}</td><td><button class="btn btn-sm btn-primary" onclick="buyItem('${p.t} токенов')">Купить</button></td></tr>`;});
-h+=`</table></div>`;
-h+=`<div class="glass"><div class="section-title">💳 Карта</div><div class="card-info">${cardNumber}</div><button class="copy-btn" onclick="copyText('${cardNumber}')">📋 Копировать</button><p style="font-size:11px;color:var(--text2);margin-top:4px;text-align:center;">${bankName}</p></div>`;
-h+=`<div class="glass"><div class="section-title">📱 СБП</div><div class="card-info">${phoneNumber}</div><button class="copy-btn" onclick="copyText('${phoneNumber}')">📋 Копировать</button></div>`;
-h+=`<div class="glass"><button class="btn btn-gold" onclick="tg.openTelegramLink('https://t.me/${telegramUser}')">💬 Написать @${telegramUser}</button></div>`;
-return h;
+function extendVideo() {
+    if (videoExtensions >= maxExtensions) { tg.showPopup({ message: '⚠️ Достигнут лимит. VIP — безлимит!' }); return; }
+    videoExtensions++;
+    tg.showPopup({ message: `✅ Видео продлено! Всего: ${videoExtensions * 6} секунд` });
+}
+function addPromptToVideo() { tg.showPopup({ message: '📝 Введи новый промт для следующего сегмента в поле выше.' }); }
+
+function audioTab() {
+    return `<div class="glass"><div class="section-title">🎤 Текст <span class="badge badge-vip">VIP/🪙3</span></div><textarea placeholder="${currentLang === 'ru' ? 'Введи текст для озвучки...' : 'Enter text for voiceover...'}"></textarea></div>
+    <div class="glass"><div class="section-title">🗣️ Голос</div><select>${voices.map(v => `<option value="${v.n}">${vName(v)}</option>`).join('')}</select></div>
+    <div class="glass"><div class="section-title">🤖 Модель (${models.audio.length})</div><div class="model-list">${models.audio.map(m => `<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.s === 'red' ? '🔜 Скоро' : '✅'}</small></div>`).join('')}</div></div>`;
 }
 
-function refTab(){
-return`<div class="glass"><div class="section-title">👥 Рефералы</div><div class="ref-link">https://t.me/AutoVerseProBot?start=ref12345</div><button class="copy-btn" onclick="copyText('https://t.me/AutoVerseProBot?start=ref12345')">📋 Копировать</button></div>
-<div class="glass"><div class="section-title">💰 Награды</div><p style="font-size:13px;">👤 Ты: +10 🪙</p><p style="font-size:13px;">👤 Друг: +5 🪙</p><p style="font-size:13px;">💎 VIP: +50 🪙</p></div>`;
+function buyTab() {
+    let h = `<div class="glass"><div class="section-title">💎 VIP Подписка</div><table class="price-table"><tr><th>Срок</th><th>₽</th><th>$</th><th></th></tr>`;
+    prices.vip.forEach(p => { h += `<tr><td>${p.d}</td><td>${p.r}₽</td><td>$${p.u}</td><td><button class="btn btn-sm btn-primary" onclick="buyItem('${p.d}')">Купить</button></td></tr>`; });
+    h += `</table></div>`;
+    h += `<div class="glass"><div class="section-title">🪙 Токены</div><table class="price-table"><tr><th>Токены</th><th>₽</th><th>$</th><th></th></tr>`;
+    prices.tokens.forEach(p => { h += `<tr><td>${p.t} 🪙</td><td>${p.r}₽</td><td>$${p.u}</td><td><button class="btn btn-sm btn-primary" onclick="buyItem('${p.t} токенов')">Купить</button></td></tr>`; });
+    h += `</table></div>`;
+    h += `<div class="glass"><div class="section-title">💳 Перевод на карту</div><div class="card-info">${cardNumber}</div><button class="copy-btn" onclick="copyText('${cardNumber}')">📋 Копировать номер карты</button><p style="font-size:11px;color:var(--text2);margin-top:4px;text-align:center;">${bankName}</p></div>`;
+    h += `<div class="glass"><div class="section-title">📱 СБП (по номеру телефона)</div><div class="card-info">${phoneNumber}</div><button class="copy-btn" onclick="copyText('${phoneNumber}')">📋 Копировать номер</button></div>`;
+    h += `<div class="glass"><button class="btn btn-gold" onclick="tg.openTelegramLink('https://t.me/${telegramUser}')">💬 Написать @${telegramUser}</button></div>`;
+    return h;
 }
 
-function learnTab(){
-let h=`<div class="glass"><div class="section-title">📚 Обучение</div>`;
-const guides=[{ru:'🎥 YouTube видео',en:'🎥 YouTube Video',desc_ru:'1. Категория\n2. Тема\n3. Голос\n4. Формат\n5. "Сгенерировать"',desc_en:'1. Category\n2. Topic\n3. Voice\n4. Format\n5. "Generate"'},{ru:'💎 VIP',en:'💎 VIP',desc_ru:'1. Оплата\n2. Напиши @Vlad_Svorob\n3. Получи ключ',desc_en:'1. Pay\n2. Message @Vlad_Svorob\n3. Get key'}];
-guides.forEach(g=>{h+=`<div class="glass"><div class="section-title">${g[lang]||g['en']}</div><p style="font-size:12px;white-space:pre-line;">${g['desc_'+lang]||g['desc_en']}</p></div>`;});
-return h;
+function refTab() {
+    return `<div class="glass"><div class="section-title">👥 Рефералы</div><div class="ref-link">https://t.me/AutoVerseProBot?start=ref12345</div><button class="copy-btn" onclick="copyText('https://t.me/AutoVerseProBot?start=ref12345')">📋 Копировать ссылку</button></div>
+    <div class="glass"><div class="section-title">💰 Награды</div><p style="font-size:13px;">👤 Ты: +10 🪙</p><p style="font-size:13px;">👤 Друг: +5 🪙</p><p style="font-size:13px;">💎 VIP: +50 🪙</p></div>`;
 }
 
-function supportTab(){
-return`<div class="glass"><div class="section-title">💬 AI-помощник</div>
-<div class="chat-box" id="chatBox"><div class="chat-msg bot">👋 ${lang==='ru'?'Привет! Спроси меня!':'Hi! Ask me!'}</div></div>
-<div style="display:flex;gap:6px;"><input type="text" id="chatInput" placeholder="${lang==='ru'?'Вопрос...':'Ask...'}" style="flex:1;" onkeypress="if(event.key==='Enter')sendChat()"><button class="btn btn-primary btn-sm" onclick="sendChat()">➤</button></div></div>`;
+function learnTab() {
+    let h = `<div class="glass"><div class="section-title">📚 Обучение</div>`;
+    const guides = [
+        { ru: '🎥 YouTube видео', en: '🎥 YouTube Video', desc_ru: '1. Выбери категорию и тему\n2. Выбери голос озвучки\n3. Выбери формат\n4. Нажми "Сгенерировать"\n5. Жди 5-10 минут', desc_en: '1. Choose category and topic\n2. Choose voice\n3. Choose format\n4. Press "Generate"\n5. Wait 5-10 minutes' },
+        { ru: '💎 VIP', en: '💎 VIP', desc_ru: '1. Переведи оплату на карту\n2. Напиши @Vlad_Svorob\n3. Получи VIP ключ\n4. Введи ключ в боте', desc_en: '1. Send payment\n2. Message @Vlad_Svorob\n3. Get VIP key\n4. Enter key in bot' }
+    ];
+    guides.forEach(g => {
+        h += `<div class="glass"><div class="section-title">${g[currentLang] || g['en']}</div><p style="font-size:12px;white-space:pre-line;">${g['desc_' + currentLang] || g['desc_en']}</p></div>`;
+    });
+    return h;
 }
 
-function sendChat(){
-const input=document.getElementById('chatInput');const msg=input.value.trim();if(!msg)return;
-const box=document.getElementById('chatBox');box.innerHTML+=`<div class="chat-msg user">${msg}</div>`;input.value='';box.scrollTop=box.scrollHeight;
-setTimeout(()=>{box.innerHTML+=`<div class="chat-msg bot">${findBestAnswer(msg)}</div>`;box.scrollTop=box.scrollHeight;},500);
+function supportTab() {
+    return `<div class="glass"><div class="section-title">💬 AI-помощник (обучен под NexusFlow)</div>
+    <div class="chat-box" id="chatBox"><div class="chat-msg bot">👋 ${currentLang === 'ru' ? 'Привет! Я AI-помощник NexusFlow. Я знаю всё о сервисе — спрашивай!' : 'Hi! I am NexusFlow AI assistant. Ask me anything!'}</div></div>
+    <div style="display:flex;gap:6px;"><input type="text" id="chatInput" placeholder="${currentLang === 'ru' ? 'Задай вопрос...' : 'Ask a question...'}" style="flex:1;" onkeypress="if(event.key==='Enter')sendChat()"><button class="btn btn-primary btn-sm" onclick="sendChat()">➤</button></div>
+    <p style="font-size:10px;color:var(--text2);margin-top:6px;">💡 ${currentLang === 'ru' ? 'Спроси: Как создать видео? Сколько стоит VIP? Какие модели есть?' : 'Ask: How to create video? VIP price? What models?'}</p></div>`;
 }
 
-function devTab(){
-let h=`<div class="glass"><div class="section-title">🛠️ Dev-панель</div>`;
-if(!devMode){
-h+=`<div class="lock-screen"><div class="lock-icon">🔒</div>
-<div class="lock-title">${lang==='ru'?'Доступ ограничен':'Access Restricted'}</div>
-<div class="lock-desc">${lang==='ru'?'Введи ключ разработчика':'Enter developer key'}</div>
-<input type="text" id="devKeyInput" placeholder="DEV-ключ..." style="text-align:center;margin-bottom:8px;">
-<button class="btn btn-gold btn-sm" style="width:100%;" id="devUnlockBtn">🔓 ${lang==='ru'?'Разблокировать':'Unlock'}</button>
-<div class="lock-error" id="devError"></div>
-<p style="font-size:10px;color:var(--text2);margin-top:8px;">${lang==='ru'?'Нет ключа? Напиши @Vlad_Svorob':'No key? Message @Vlad_Svorob'}</p></div></div>`;
-return h;
-}
-h+=`<div class="stats-grid"><div class="stat-card"><div class="stat-value stat-accent">156</div><div class="stat-label">Пользователей</div></div><div class="stat-card"><div class="stat-value stat-gold">23</div><div class="stat-label">VIP</div></div><div class="stat-card"><div class="stat-value">142</div><div class="stat-label">Генераций</div></div><div class="stat-card"><div class="stat-value">8/8</div><div class="stat-label">Моделей</div></div></div>
-<input type="text" placeholder="Новый VIP-ключ..." style="margin-top:8px;"><button class="btn btn-gold btn-sm" style="width:100%;margin-top:6px;">➕ Создать ключ</button>
-<button class="btn btn-red btn-sm" style="width:100%;margin-top:6px;" onclick="devMode=false;R();">🔒 Выйти</button></div>
-<div class="glass"><div class="section-title">📁 Файлы</div>`;
-files.forEach((f,i)=>{h+=`<div class="file-list-item"><div class="file-icon">${f.t==='html'?'📄':f.t==='python'?'🐍':'📝'}</div><div class="file-name">${f.n}</div><div class="file-size">${f.s}</div><div class="file-actions"><button class="btn btn-outline btn-sm" onclick="editFile(${i})">✏️</button></div></div>`;});
-h+=`</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v3.3 — Dev 100% Fixed</p></div>`;
-return h;
+function sendChat() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    const box = document.getElementById('chatBox');
+    box.innerHTML += `<div class="chat-msg user">${msg}</div>`;
+    input.value = '';
+    box.scrollTop = box.scrollHeight;
+    setTimeout(() => {
+        const reply = findBestAnswer(msg);
+        box.innerHTML += `<div class="chat-msg bot">${reply}</div>`;
+        box.scrollTop = box.scrollHeight;
+    }, 500);
 }
 
-function editFile(i){const f=files[i];const m=document.getElementById('modal');m.style.display='flex';m.innerHTML=`<div class="modal-content"><div class="section-title">✏️ ${f.n}</div><div class="editor-toolbar"><button onclick="saveFile(${i})">💾 Сохранить</button><button onclick="closeModal()">❌ Отмена</button></div><div class="code-editor" contenteditable="true">// ${f.n}</div></div>`;}
-function saveFile(i){closeModal();tg.showPopup({message:'✅ Сохранено!'});}
-function closeModal(){document.getElementById('modal').style.display='none';}
-function selectTab(t){tab=t;videoExtensions=0;document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));const el=document.querySelector(`.tab[onclick*="${t}"]`);if(el)el.classList.add('active');R();}
-function selectFmt(f){fmt=f;R();}
-function setLang(l){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');R();}
-function buyItem(i){tg.openTelegramLink('https://t.me/'+telegramUser);}
-function copyText(t){navigator.clipboard.writeText(t);tg.showPopup({message:'✅ Скопировано!'});}
-function updateCatHelp(){const cat=document.getElementById('ycat')?.value;const c=categories.find(x=>x.n===cat);if(c){document.getElementById('catHelp').innerHTML='💡 '+(lang==='ru'?`Музыка: ${c.music} | Озвучка: ${c.voice==='none'?'нет':c.voice}`:`Music: ${c.music} | Voice: ${c.voice==='none'?'none':c.voice}`);}}
+function devTab() {
+    let h = `<div class="glass"><div class="section-title">🛠️ Dev-панель</div>`;
+    if (!devMode) {
+        h += `<div class="lock-screen"><div class="lock-icon">🔒</div>
+        <div class="lock-title">${currentLang === 'ru' ? 'Доступ ограничен' : 'Access Restricted'}</div>
+        <div class="lock-desc">${currentLang === 'ru' ? 'Введи ключ разработчика для доступа к Dev-панели' : 'Enter developer key to access Dev Panel'}</div>
+        <input type="text" id="devKeyInput" placeholder="DEV-ключ..." style="text-align:center;margin-bottom:8px;">
+        <button class="btn btn-gold btn-sm" style="width:100%;" id="devUnlockBtn">🔓 ${currentLang === 'ru' ? 'Разблокировать' : 'Unlock'}</button>
+        <div class="lock-error" id="devError"></div>
+        <p style="font-size:10px;color:var(--text2);margin-top:8px;">${currentLang === 'ru' ? 'Нет ключа? Напиши @Vlad_Svorob' : 'No key? Message @Vlad_Svorob'}</p></div></div>`;
+        return h;
+    }
+    h += `<div class="stats-grid"><div class="stat-card"><div class="stat-value accent">156</div><div class="stat-label">Пользователей</div></div><div class="stat-card"><div class="stat-value gold">23</div><div class="stat-label">VIP</div></div><div class="stat-card"><div class="stat-value">142</div><div class="stat-label">Генераций</div></div><div class="stat-card"><div class="stat-value">8/8</div><div class="stat-label">Моделей</div></div></div>
+    <input type="text" placeholder="Новый VIP-ключ..." style="margin-top:8px;"><button class="btn btn-gold btn-sm" style="width:100%;margin-top:6px;">➕ Создать ключ</button>
+    <button class="btn btn-red btn-sm" style="width:100%;margin-top:6px;" onclick="devMode=false;R();">🔒 Выйти</button></div>
+    <div class="glass"><div class="section-title">📁 Файлы проекта</div>`;
+    files.forEach((f, i) => {
+        h += `<div class="file-list-item"><div class="file-icon">${f.t === 'html' ? '📄' : f.t === 'python' ? '🐍' : '📝'}</div><div class="file-name">${f.n}</div><div class="file-size">${f.s}</div><div class="file-actions"><button class="btn btn-outline btn-sm" onclick="editFile(${i})">✏️</button></div></div>`;
+    });
+    h += `</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v3.4 Final — Всё работает</p></div>`;
+    return h;
+}
 
-function generate(){
-document.getElementById('progress').style.display='block';
-const f=document.getElementById('progressFill'),l=document.getElementById('progressLabel');let p=0;
-const steps=lang==='ru'?['Подготовка','Сценарий','Поиск','Озвучка','Монтаж','Готово']:['Preparing','Script','Finding','Voice','Editing','Done'];
-const int=setInterval(()=>{p+=Math.floor(Math.random()*12)+5;if(p>=100){p=100;clearInterval(int);l.textContent='✅ '+(lang==='ru'?'Готово!':'Done!');}else{l.textContent=steps[Math.floor(p/20)]+' · '+p+'%';}f.style.width=p+'%';},600);
+function editFile(i) {
+    const f = files[i];
+    const m = document.getElementById('modal');
+    m.style.display = 'flex';
+    m.innerHTML = `<div class="modal-content"><div class="section-title">✏️ Редактор: ${f.n}</div><div class="editor-toolbar"><button onclick="saveFile(${i})">💾 Сохранить</button><button onclick="closeModal()">❌ Отмена</button></div><div class="code-editor" contenteditable="true">// Загрузка содержимого ${f.n}...</div></div>`;
+}
+function saveFile(i) { closeModal(); tg.showPopup({ message: '✅ Файл сохранён!' }); }
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+function selectTab(t) { currentTab = t; videoExtensions = 0; document.querySelectorAll('.tab').forEach(el => el.classList.remove('active')); const el = document.querySelector(`.tab[onclick*="${t}"]`); if (el) el.classList.add('active'); R(); }
+function selectFmt(f) { selectedFormat = f; R(); }
+function setLang(l) { currentLang = l; document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active'); R(); }
+function buyItem(i) { tg.openTelegramLink('https://t.me/' + telegramUser); }
+function copyText(t) { navigator.clipboard.writeText(t); tg.showPopup({ message: '✅ Скопировано!' }); }
+function updateCatHelp() {
+    const cat = document.getElementById('ycat')?.value;
+    const c = categories.find(x => x.n === cat);
+    if (c) {
+        document.getElementById('catHelp').innerHTML = '💡 ' + (currentLang === 'ru' ?
+            `Музыка: ${c.music} | Озвучка: ${c.voice === 'none' ? 'нет' : c.voice}` :
+            `Music: ${c.music} | Voice: ${c.voice === 'none' ? 'none' : c.voice}`);
+    }
+}
+
+function generate() {
+    document.getElementById('progress').style.display = 'block';
+    const f = document.getElementById('progressFill'), l = document.getElementById('progressLabel');
+    let p = 0;
+    const steps = currentLang === 'ru' ? ['Подготовка', 'Сценарий', 'Поиск видео', 'Озвучка', 'Монтаж', 'Готово'] : ['Preparing', 'Script', 'Finding', 'Voice', 'Editing', 'Done'];
+    const int = setInterval(() => {
+        p += Math.floor(Math.random() * 12) + 5;
+        if (p >= 100) { p = 100; clearInterval(int); l.textContent = '✅ ' + (currentLang === 'ru' ? 'Готово!' : 'Done!'); }
+        else { l.textContent = steps[Math.floor(p / 20)] + ' · ' + p + '%'; }
+        f.style.width = p + '%';
+    }, 600);
 }
 
 R();
