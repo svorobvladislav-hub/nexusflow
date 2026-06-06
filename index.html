@@ -487,7 +487,7 @@
     <div class="header">
         <div class="logo">🎬</div>
         <h1>NexusFlow</h1>
-        <p class="subtitle">AI Video Pipeline · v3.4 Final</p>
+        <p class="subtitle">AI Video Pipeline · v4.0</p>
     </div>
 
     <div class="profile-bar">
@@ -562,13 +562,13 @@ const categories = [
 ];
 
 const voices = [
-    { n: 'auto', ru: '🤖 Авто (по языку)', en: '🤖 Auto' },
+    { n: 'auto', ru: '🤖 Авто', en: '🤖 Auto' },
     { n: 'male_us', ru: '👨 🇺🇸 Мужской (США)', en: '👨 🇺🇸 Male (US)' },
     { n: 'female_us', ru: '👩 🇺🇸 Женский (США)', en: '👩 🇺🇸 Female (US)' },
     { n: 'male_uk', ru: '👨 🇬🇧 Британский', en: '👨 🇬🇧 British' },
     { n: 'female_uk', ru: '👩 🇬🇧 Британская', en: '👩 🇬🇧 British' },
-    { n: 'male_ru', ru: '👨 🇷🇺 Русский мужской', en: '👨 🇷🇺 Russian Male' },
-    { n: 'female_ru', ru: '👩 🇷🇺 Русский женский', en: '👩 🇷🇺 Russian Female' },
+    { n: 'male_ru', ru: '👨 🇷🇺 Русский', en: '👨 🇷🇺 Russian Male' },
+    { n: 'female_ru', ru: '👩 🇷🇺 Русская', en: '👩 🇷🇺 Russian Female' },
     { n: 'male_de', ru: '👨 🇩🇪 Немецкий', en: '👨 🇩🇪 German' },
     { n: 'female_es', ru: '👩 🇪🇸 Испанский', en: '👩 🇪🇸 Spanish' }
 ];
@@ -608,7 +608,6 @@ const knowledgeBase = {
         'привет': '👋 Привет! Я AI-помощник NexusFlow. Спроси о видео, VIP, моделях!',
         'как создать': '📹 **YouTube:**\n1. Вкладка 🎥 YT\n2. Категория\n3. Тема\n4. Голос\n5. Формат\n6. "Сгенерировать"',
         'vip': '💎 **VIP:**\n1. Оплата на карту 2204321238722\n2. Напиши @Vlad_Svorob\n3. Получи ключ',
-        'цена': '💰 VIP: 500₽/мес, 3500₽ навсегда\n🪙 Токены: 50=300₽',
         'default': 'Я помогу с видео, VIP, токенами. Спроси! 😊'
     },
     en: {
@@ -645,7 +644,6 @@ function render() {
     document.getElementById('generateBtnContainer').style.display = genTabs.includes(currentTab) ? 'block' : 'none';
     document.getElementById('progress').style.display = 'none';
 
-    // Вешаем обработчик на кнопку Dev-разблокировки
     const unlockBtn = document.getElementById('devUnlockBtn');
     if (unlockBtn) {
         unlockBtn.onclick = function() {
@@ -653,18 +651,9 @@ function render() {
             const errEl = document.getElementById('devError');
             if (!keyInput) return;
             const key = keyInput.value.trim();
-            if (!key) {
-                if (errEl) errEl.textContent = currentLang === 'ru' ? '❌ Введи ключ!' : '❌ Enter key!';
-                return;
-            }
-            if (DEV_KEYS.includes(key)) {
-                devMode = true;
-                if (errEl) errEl.textContent = '';
-                R();
-            } else {
-                if (errEl) errEl.textContent = currentLang === 'ru' ? '❌ Неверный ключ' : '❌ Invalid key';
-                keyInput.value = '';
-            }
+            if (!key) { if (errEl) errEl.textContent = '❌ Введи ключ!'; return; }
+            if (DEV_KEYS.includes(key)) { devMode = true; if (errEl) errEl.textContent = ''; R(); }
+            else { if (errEl) errEl.textContent = '❌ Неверный ключ'; keyInput.value = ''; }
         };
     }
 }
@@ -675,45 +664,43 @@ function vName(v) { return v[currentLang] || v['en']; }
 function youtubeTab() {
     let h = `<div class="glass"><div class="section-title">📂 Категория</div><select id="ycat" onchange="updateCatHelp()">`;
     categories.forEach(c => { h += `<option value="${c.n}">${catName(c)}</option>`; });
-    h += `</select><div class="help-box" id="catHelp">💡 ${currentLang === 'ru' ? 'Выбери категорию для видео' : 'Choose a category'}</div></div>`;
-    h += `<div class="glass"><div class="section-title">📋 Тема</div><input type="text" placeholder="${currentLang === 'ru' ? 'Опиши тему видео...' : 'Describe your video topic...'}"></div>`;
-    h += `<div class="glass"><div class="section-title">🎤 Голос озвучки</div><select id="voice" onchange="currentVoice=this.value">`;
-    voices.forEach(v => { h += `<option value="${v.n}" ${v.n === currentVoice ? 'selected' : ''}>${vName(v)}</option>`; });
+    h += `</select><div class="help-box" id="catHelp">💡 Выбери категорию</div></div>`;
+    h += `<div class="glass"><div class="section-title">📋 Тема</div><input type="text" placeholder="Опиши тему видео..."></div>`;
+    h += `<div class="glass"><div class="section-title">🎤 Голос</div><select id="voice" onchange="currentVoice=this.value">`;
+    voices.forEach(v => { h += `<option value="${v.n}">${vName(v)}</option>`; });
     h += `</select></div>`;
-    h += `<div class="glass"><div class="section-title">📹 Формат</div><div class="btn-row"><button class="btn btn-sm ${selectedFormat === 'h' ? 'btn-primary' : 'btn-outline'}" onclick="selectFmt('h')">📹 Гор</button><button class="btn btn-sm ${selectedFormat === 's' ? 'btn-primary' : 'btn-outline'}" onclick="selectFmt('s')">📱 Верт</button><button class="btn btn-sm ${selectedFormat === 'b' ? 'btn-primary' : 'btn-outline'}" onclick="selectFmt('b')">🔄 Оба</button></div></div>`;
+    h += `<div class="glass"><div class="section-title">📹 Формат</div><div class="btn-row"><button class="btn btn-sm ${selectedFormat==='h'?'btn-primary':'btn-outline'}" onclick="selectFmt('h')">📹 Гор</button><button class="btn btn-sm ${selectedFormat==='s'?'btn-primary':'btn-outline'}" onclick="selectFmt('s')">📱 Верт</button><button class="btn btn-sm ${selectedFormat==='b'?'btn-primary':'btn-outline'}" onclick="selectFmt('b')">🔄 Оба</button></div></div>`;
     return h;
 }
 
 function photoTab() {
-    return `<div class="glass"><div class="section-title">🖼️ Промт <span class="badge badge-vip">VIP/🪙5</span></div><textarea placeholder="${currentLang === 'ru' ? 'Опиши что сгенерировать...' : 'Describe what to generate...'}"></textarea></div>
-    <div class="glass"><div class="section-title">🤖 Модель (${models.photo.length})</div><div class="model-list">${models.photo.map(m => `<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.s === 'red' ? '🔜 Скоро' : '✅'}</small></div>`).join('')}</div></div>`;
+    return `<div class="glass"><div class="section-title">🖼️ Промт <span class="badge badge-vip">VIP/🪙5</span></div><textarea placeholder="Опиши что сгенерировать..."></textarea></div>
+    <div class="glass"><div class="section-title">🤖 Модель (${models.photo.length})</div><div class="model-list">${models.photo.map(m => `<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
 }
 
 function videoTab() {
-    let h = `<div class="glass"><div class="section-title">🎬 Промт или фото <span class="badge badge-vip">VIP/🪙10</span></div><textarea placeholder="${currentLang === 'ru' ? 'Опиши видео...' : 'Describe video...'}"></textarea>
+    let h = `<div class="glass"><div class="section-title">🎬 Промт <span class="badge badge-vip">VIP/🪙10</span></div><textarea placeholder="Опиши видео..."></textarea>
     <button class="btn btn-outline btn-sm" style="width:100%;margin-top:8px;">📁 Загрузить фото</button></div>
-    <div class="glass"><div class="section-title">🤖 Модель (${models.video.length})</div><div class="model-list">${models.video.map(m => `<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.d || ''} · ${m.s === 'red' ? '🔜' : '✅'}</small></div>`).join('')}</div></div>`;
-    h += `<div class="glass"><div class="section-title">⏱️ Продление видео</div>
-    <div class="extend-bar">
-    <span class="extend-count">📹 ${videoExtensions * 6}с / ${maxExtensions * 6}с</span>
+    <div class="glass"><div class="section-title">🤖 Модель (${models.video.length})</div><div class="model-list">${models.video.map(m => `<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.d||''} · ${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
+    h += `<div class="glass"><div class="section-title">⏱️ Продление</div>
+    <div class="extend-bar"><span class="extend-count">📹 ${videoExtensions*6}с / ${maxExtensions*6}с</span>
     <button class="btn btn-outline btn-xs" onclick="extendVideo()" style="flex:1;">🔄 Продлить +6с</button>
-    <button class="btn btn-outline btn-xs" onclick="addPromptToVideo()" style="flex:1;">📝 Добавить промт</button>
-    </div>
-    <p style="font-size:10px;color:var(--text2);margin-top:6px;">Бесплатно: 5 продлений | VIP: безлимит</p></div>`;
+    <button class="btn btn-outline btn-xs" onclick="addPromptToVideo()" style="flex:1;">📝 Промт</button></div>
+    <p style="font-size:10px;color:var(--text2);margin-top:6px;">Бесплатно: 5 | VIP: безлимит</p></div>`;
     return h;
 }
 
 function extendVideo() {
-    if (videoExtensions >= maxExtensions) { tg.showPopup({ message: '⚠️ Достигнут лимит. VIP — безлимит!' }); return; }
+    if (videoExtensions >= maxExtensions) { alert('Лимит! VIP — безлимит.'); return; }
     videoExtensions++;
-    tg.showPopup({ message: `✅ Видео продлено! Всего: ${videoExtensions * 6} секунд` });
+    alert('Продлено! Всего: ' + (videoExtensions * 6) + ' секунд');
 }
-function addPromptToVideo() { tg.showPopup({ message: '📝 Введи новый промт для следующего сегмента в поле выше.' }); }
+function addPromptToVideo() { alert('Введи новый промт в поле выше.'); }
 
 function audioTab() {
-    return `<div class="glass"><div class="section-title">🎤 Текст <span class="badge badge-vip">VIP/🪙3</span></div><textarea placeholder="${currentLang === 'ru' ? 'Введи текст для озвучки...' : 'Enter text for voiceover...'}"></textarea></div>
+    return `<div class="glass"><div class="section-title">🎤 Текст <span class="badge badge-vip">VIP/🪙3</span></div><textarea placeholder="Введи текст..."></textarea></div>
     <div class="glass"><div class="section-title">🗣️ Голос</div><select>${voices.map(v => `<option value="${v.n}">${vName(v)}</option>`).join('')}</select></div>
-    <div class="glass"><div class="section-title">🤖 Модель (${models.audio.length})</div><div class="model-list">${models.audio.map(m => `<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small style="color:var(--text2)">${m.s === 'red' ? '🔜 Скоро' : '✅'}</small></div>`).join('')}</div></div>`;
+    <div class="glass"><div class="section-title">🤖 Модель (${models.audio.length})</div><div class="model-list">${models.audio.map(m => `<div class="model-item"><span class="dot dot-${m.s}"></span>${m.n}<br><small>${m.s==='red'?'🔜':'✅'}</small></div>`).join('')}</div></div>`;
 }
 
 function buyTab() {
@@ -723,34 +710,31 @@ function buyTab() {
     h += `<div class="glass"><div class="section-title">🪙 Токены</div><table class="price-table"><tr><th>Токены</th><th>₽</th><th>$</th><th></th></tr>`;
     prices.tokens.forEach(p => { h += `<tr><td>${p.t} 🪙</td><td>${p.r}₽</td><td>$${p.u}</td><td><button class="btn btn-sm btn-primary" onclick="buyItem('${p.t} токенов')">Купить</button></td></tr>`; });
     h += `</table></div>`;
-    h += `<div class="glass"><div class="section-title">💳 Перевод на карту</div><div class="card-info">${cardNumber}</div><button class="copy-btn" onclick="copyText('${cardNumber}')">📋 Копировать номер карты</button><p style="font-size:11px;color:var(--text2);margin-top:4px;text-align:center;">${bankName}</p></div>`;
-    h += `<div class="glass"><div class="section-title">📱 СБП (по номеру телефона)</div><div class="card-info">${phoneNumber}</div><button class="copy-btn" onclick="copyText('${phoneNumber}')">📋 Копировать номер</button></div>`;
+    h += `<div class="glass"><div class="section-title">💳 Карта</div><div class="card-info">${cardNumber}</div><button class="copy-btn" onclick="copyText('${cardNumber}')">📋 Копировать</button><p style="font-size:11px;color:var(--text2);text-align:center;">${bankName}</p></div>`;
+    h += `<div class="glass"><div class="section-title">📱 СБП</div><div class="card-info">${phoneNumber}</div><button class="copy-btn" onclick="copyText('${phoneNumber}')">📋 Копировать</button></div>`;
     h += `<div class="glass"><button class="btn btn-gold" onclick="tg.openTelegramLink('https://t.me/${telegramUser}')">💬 Написать @${telegramUser}</button></div>`;
     return h;
 }
 
 function refTab() {
-    return `<div class="glass"><div class="section-title">👥 Рефералы</div><div class="ref-link">https://t.me/AutoVerseProBot?start=ref12345</div><button class="copy-btn" onclick="copyText('https://t.me/AutoVerseProBot?start=ref12345')">📋 Копировать ссылку</button></div>
+    return `<div class="glass"><div class="section-title">👥 Рефералы</div><div class="ref-link">https://t.me/AutoVerseProBot?start=ref12345</div><button class="copy-btn" onclick="copyText('https://t.me/AutoVerseProBot?start=ref12345')">📋 Копировать</button></div>
     <div class="glass"><div class="section-title">💰 Награды</div><p style="font-size:13px;">👤 Ты: +10 🪙</p><p style="font-size:13px;">👤 Друг: +5 🪙</p><p style="font-size:13px;">💎 VIP: +50 🪙</p></div>`;
 }
 
 function learnTab() {
     let h = `<div class="glass"><div class="section-title">📚 Обучение</div>`;
     const guides = [
-        { ru: '🎥 YouTube видео', en: '🎥 YouTube Video', desc_ru: '1. Выбери категорию и тему\n2. Выбери голос озвучки\n3. Выбери формат\n4. Нажми "Сгенерировать"\n5. Жди 5-10 минут', desc_en: '1. Choose category and topic\n2. Choose voice\n3. Choose format\n4. Press "Generate"\n5. Wait 5-10 minutes' },
-        { ru: '💎 VIP', en: '💎 VIP', desc_ru: '1. Переведи оплату на карту\n2. Напиши @Vlad_Svorob\n3. Получи VIP ключ\n4. Введи ключ в боте', desc_en: '1. Send payment\n2. Message @Vlad_Svorob\n3. Get VIP key\n4. Enter key in bot' }
+        { ru: '🎥 YouTube', en: '🎥 YouTube', desc_ru: '1. Категория\n2. Тема\n3. Голос\n4. Формат\n5. "Сгенерировать"', desc_en: '1. Category\n2. Topic\n3. Voice\n4. Format\n5. "Generate"' },
+        { ru: '💎 VIP', en: '💎 VIP', desc_ru: '1. Оплата\n2. Напиши @Vlad_Svorob\n3. Ключ', desc_en: '1. Pay\n2. Message\n3. Key' }
     ];
-    guides.forEach(g => {
-        h += `<div class="glass"><div class="section-title">${g[currentLang] || g['en']}</div><p style="font-size:12px;white-space:pre-line;">${g['desc_' + currentLang] || g['desc_en']}</p></div>`;
-    });
+    guides.forEach(g => { h += `<div class="glass"><div class="section-title">${g[currentLang]||g['en']}</div><p style="font-size:12px;white-space:pre-line;">${g['desc_'+currentLang]||g['desc_en']}</p></div>`; });
     return h;
 }
 
 function supportTab() {
-    return `<div class="glass"><div class="section-title">💬 AI-помощник (обучен под NexusFlow)</div>
-    <div class="chat-box" id="chatBox"><div class="chat-msg bot">👋 ${currentLang === 'ru' ? 'Привет! Я AI-помощник NexusFlow. Я знаю всё о сервисе — спрашивай!' : 'Hi! I am NexusFlow AI assistant. Ask me anything!'}</div></div>
-    <div style="display:flex;gap:6px;"><input type="text" id="chatInput" placeholder="${currentLang === 'ru' ? 'Задай вопрос...' : 'Ask a question...'}" style="flex:1;" onkeypress="if(event.key==='Enter')sendChat()"><button class="btn btn-primary btn-sm" onclick="sendChat()">➤</button></div>
-    <p style="font-size:10px;color:var(--text2);margin-top:6px;">💡 ${currentLang === 'ru' ? 'Спроси: Как создать видео? Сколько стоит VIP? Какие модели есть?' : 'Ask: How to create video? VIP price? What models?'}</p></div>`;
+    return `<div class="glass"><div class="section-title">💬 AI-помощник</div>
+    <div class="chat-box" id="chatBox"><div class="chat-msg bot">👋 Привет! Спроси меня!</div></div>
+    <div style="display:flex;gap:6px;"><input type="text" id="chatInput" placeholder="Вопрос..." style="flex:1;" onkeypress="if(event.key==='Enter')sendChat()"><button class="btn btn-primary btn-sm" onclick="sendChat()">➤</button></div></div>`;
 }
 
 function sendChat() {
@@ -761,70 +745,74 @@ function sendChat() {
     box.innerHTML += `<div class="chat-msg user">${msg}</div>`;
     input.value = '';
     box.scrollTop = box.scrollHeight;
-    setTimeout(() => {
-        const reply = findBestAnswer(msg);
-        box.innerHTML += `<div class="chat-msg bot">${reply}</div>`;
-        box.scrollTop = box.scrollHeight;
-    }, 500);
+    setTimeout(() => { box.innerHTML += `<div class="chat-msg bot">${findBestAnswer(msg)}</div>`; box.scrollTop = box.scrollHeight; }, 500);
 }
 
 function devTab() {
     let h = `<div class="glass"><div class="section-title">🛠️ Dev-панель</div>`;
     if (!devMode) {
-        h += `<div class="lock-screen"><div class="lock-icon">🔒</div>
-        <div class="lock-title">${currentLang === 'ru' ? 'Доступ ограничен' : 'Access Restricted'}</div>
-        <div class="lock-desc">${currentLang === 'ru' ? 'Введи ключ разработчика для доступа к Dev-панели' : 'Enter developer key to access Dev Panel'}</div>
+        h += `<div class="lock-screen"><div class="lock-icon">🔒</div><div class="lock-title">Доступ ограничен</div><div class="lock-desc">Введи ключ разработчика</div>
         <input type="text" id="devKeyInput" placeholder="DEV-ключ..." style="text-align:center;margin-bottom:8px;">
-        <button class="btn btn-gold btn-sm" style="width:100%;" id="devUnlockBtn">🔓 ${currentLang === 'ru' ? 'Разблокировать' : 'Unlock'}</button>
+        <button class="btn btn-gold btn-sm" style="width:100%;" id="devUnlockBtn">🔓 Разблокировать</button>
         <div class="lock-error" id="devError"></div>
-        <p style="font-size:10px;color:var(--text2);margin-top:8px;">${currentLang === 'ru' ? 'Нет ключа? Напиши @Vlad_Svorob' : 'No key? Message @Vlad_Svorob'}</p></div></div>`;
+        <p style="font-size:10px;color:var(--text2);margin-top:8px;">Нет ключа? Напиши @Vlad_Svorob</p></div></div>`;
         return h;
     }
     h += `<div class="stats-grid"><div class="stat-card"><div class="stat-value accent">156</div><div class="stat-label">Пользователей</div></div><div class="stat-card"><div class="stat-value gold">23</div><div class="stat-label">VIP</div></div><div class="stat-card"><div class="stat-value">142</div><div class="stat-label">Генераций</div></div><div class="stat-card"><div class="stat-value">8/8</div><div class="stat-label">Моделей</div></div></div>
     <input type="text" placeholder="Новый VIP-ключ..." style="margin-top:8px;"><button class="btn btn-gold btn-sm" style="width:100%;margin-top:6px;">➕ Создать ключ</button>
     <button class="btn btn-red btn-sm" style="width:100%;margin-top:6px;" onclick="devMode=false;R();">🔒 Выйти</button></div>
-    <div class="glass"><div class="section-title">📁 Файлы проекта</div>`;
-    files.forEach((f, i) => {
-        h += `<div class="file-list-item"><div class="file-icon">${f.t === 'html' ? '📄' : f.t === 'python' ? '🐍' : '📝'}</div><div class="file-name">${f.n}</div><div class="file-size">${f.s}</div><div class="file-actions"><button class="btn btn-outline btn-sm" onclick="editFile(${i})">✏️</button></div></div>`;
-    });
-    h += `</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v3.4 Final — Всё работает</p></div>`;
+    <div class="glass"><div class="section-title">📁 Файлы</div>`;
+    files.forEach((f, i) => { h += `<div class="file-list-item"><div class="file-icon">${f.t==='html'?'📄':f.t==='python'?'🐍':'📝'}</div><div class="file-name">${f.n}</div><div class="file-size">${f.s}</div><div class="file-actions"><button class="btn btn-outline btn-sm" onclick="editFile(${i})">✏️</button></div></div>`; });
+    h += `</div><div class="glass"><p style="font-size:12px;color:var(--text2);">v4.0 — Send Fixed</p></div>`;
     return h;
 }
 
 function editFile(i) {
-    const f = files[i];
-    const m = document.getElementById('modal');
-    m.style.display = 'flex';
-    m.innerHTML = `<div class="modal-content"><div class="section-title">✏️ Редактор: ${f.n}</div><div class="editor-toolbar"><button onclick="saveFile(${i})">💾 Сохранить</button><button onclick="closeModal()">❌ Отмена</button></div><div class="code-editor" contenteditable="true">// Загрузка содержимого ${f.n}...</div></div>`;
+    const f = files[i]; const m = document.getElementById('modal'); m.style.display = 'flex';
+    m.innerHTML = `<div class="modal-content"><div class="section-title">✏️ ${f.n}</div><div class="editor-toolbar"><button onclick="saveFile(${i})">💾 Сохранить</button><button onclick="closeModal()">❌ Отмена</button></div><div class="code-editor" contenteditable="true">// ${f.n}</div></div>`;
 }
-function saveFile(i) { closeModal(); tg.showPopup({ message: '✅ Файл сохранён!' }); }
+function saveFile(i) { closeModal(); alert('Сохранено!'); }
 function closeModal() { document.getElementById('modal').style.display = 'none'; }
 function selectTab(t) { currentTab = t; videoExtensions = 0; document.querySelectorAll('.tab').forEach(el => el.classList.remove('active')); const el = document.querySelector(`.tab[onclick*="${t}"]`); if (el) el.classList.add('active'); R(); }
 function selectFmt(f) { selectedFormat = f; R(); }
 function setLang(l) { currentLang = l; document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active'); R(); }
 function buyItem(i) { tg.openTelegramLink('https://t.me/' + telegramUser); }
-function copyText(t) { navigator.clipboard.writeText(t); tg.showPopup({ message: '✅ Скопировано!' }); }
+function copyText(t) { navigator.clipboard.writeText(t); alert('Скопировано!'); }
 function updateCatHelp() {
     const cat = document.getElementById('ycat')?.value;
     const c = categories.find(x => x.n === cat);
-    if (c) {
-        document.getElementById('catHelp').innerHTML = '💡 ' + (currentLang === 'ru' ?
-            `Музыка: ${c.music} | Озвучка: ${c.voice === 'none' ? 'нет' : c.voice}` :
-            `Music: ${c.music} | Voice: ${c.voice === 'none' ? 'none' : c.voice}`);
-    }
+    if (c) { document.getElementById('catHelp').innerHTML = `💡 Музыка: ${c.music} | Озвучка: ${c.voice==='none'?'нет':c.voice}`; }
 }
 
 function generate() {
+    var topic = 'BMW M5 drift';
+    var cat = 'drift';
+    
+    var topicInput = document.querySelector('input[type="text"]');
+    if (topicInput && topicInput.value) topic = topicInput.value;
+    
+    var catSelect = document.getElementById('ycat');
+    if (catSelect && catSelect.value) cat = catSelect.value;
+    
+    var payload = {
+        action: 'generate',
+        topic: topic,
+        category: cat,
+        format: selectedFormat || 'b',
+        lang: currentLang || 'ru',
+        tab: currentTab || 'youtube'
+    };
+    
     document.getElementById('progress').style.display = 'block';
-    const f = document.getElementById('progressFill'), l = document.getElementById('progressLabel');
-    let p = 0;
-    const steps = currentLang === 'ru' ? ['Подготовка', 'Сценарий', 'Поиск видео', 'Озвучка', 'Монтаж', 'Готово'] : ['Preparing', 'Script', 'Finding', 'Voice', 'Editing', 'Done'];
-    const int = setInterval(() => {
-        p += Math.floor(Math.random() * 12) + 5;
-        if (p >= 100) { p = 100; clearInterval(int); l.textContent = '✅ ' + (currentLang === 'ru' ? 'Готово!' : 'Done!'); }
-        else { l.textContent = steps[Math.floor(p / 20)] + ' · ' + p + '%'; }
-        f.style.width = p + '%';
-    }, 600);
+    document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('progressLabel').textContent = 'Отправка...';
+    
+    try {
+        tg.sendData(JSON.stringify(payload));
+        document.getElementById('progressLabel').textContent = '✅ Отправлено! Жди в чате.';
+    } catch(e) {
+        document.getElementById('progressLabel').textContent = 'Ошибка: ' + e.message;
+    }
 }
 
 R();
